@@ -1,0 +1,18 @@
+const { send } = require('process')
+const router = require('.')
+
+const sdRouter = require('express').Router()
+const SDBController = require('../controllers/SDBController')
+const Authentication = require('../middlewares/authentication')
+
+/*
+Router.get / .post / .delete / .patch / .put
+*/
+
+sdRouter.post('/tambah', SDBController.tambah)
+sdRouter.delete('/', SDBController.delete)
+sdRouter.put('/', SDBController.update)
+sdRouter.get('/', SDBController.read)
+
+
+module.exports = sdRouter

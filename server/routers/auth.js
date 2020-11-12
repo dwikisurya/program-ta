@@ -12,4 +12,5 @@ Router.get / .post / .delete / .patch / .put
 authRouter.post('/register', AuthController.register)
 authRouter.post('/login', AuthController.login)
 
+
 module.exports = authRouter

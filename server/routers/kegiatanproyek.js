@@ -10,8 +10,9 @@ Router.get / .post / .delete / .patch / .put
 
 */
 kegiatanproyek.post('/tambah', KegiatanController.tambah)
-kegiatanproyek.delete('/', KegiatanController.delete)
+kegiatanproyek.delete('/:id', KegiatanController.delete)
 kegiatanproyek.put('/', KegiatanController.update)
 kegiatanproyek.get('/', KegiatanController.read)
+kegiatanproyek.get('/:id', KegiatanController.readOne)
 
 module.exports = kegiatanproyek

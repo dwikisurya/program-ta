@@ -2,9 +2,11 @@ require('dotenv').config()
 const express = require('express')
 const mongoose = require('mongoose')
 const { urlencoded, json } = require('express')
-const routers = require('./routers')
 const router = require('./routers')
+const cors = require('cors')
 const app = express()
+
+app.use(cors())
 
 const MONGOOSEURI = `mongodb://localhost/belajarAuth`
 const mongooseOptions = {
@@ -23,7 +25,7 @@ db.once('open', () => {
 app.use(urlencoded({ extended: true }))
 app.use(json())
 
-const PORT = 3000
+const PORT = 5000
 app.use(router)
 
 app.listen(PORT, _ => {

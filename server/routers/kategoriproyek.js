@@ -11,8 +11,9 @@ Router.get / .post / .delete / .patch / .put
 
 */
 kategoriproyek.post('/tambah', KategoriController.tambah)
-kategoriproyek.delete('/', KategoriController.delete)
+kategoriproyek.delete('/:id', KategoriController.delete)
 kategoriproyek.put('/', KategoriController.update)
 kategoriproyek.get('/', KategoriController.read)
+kategoriproyek.get('/:id', KategoriController.readOne)
 
 module.exports = kategoriproyek

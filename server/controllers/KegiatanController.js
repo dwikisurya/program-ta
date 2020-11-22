@@ -27,15 +27,15 @@ module.exports = class KegiatanController {
 
     // Delete data, dapat dari _id
     static delete(req, res) {
-        const id = req.body.id
+        const id = req.params.id
 
-        kegiatanProyek.findByIdAndDelete({
-            _id: id
-        }).then((result) => {
-            res.status(303).json({ msg: 'Data Berhasil Dihapus' })
-        }).catch((err) => {
-            res.status(500).json(err)
-        })
+        kegiatanProyek.findByIdAndDelete(id)
+            .exec()
+            .then((result) => {
+                res.status(303).json({ msg: 'Data Berhasil Dihapus' })
+            }).catch((err) => {
+                res.status(500).json(err)
+            })
     }
 
     // Update data, dari _id
@@ -69,5 +69,17 @@ module.exports = class KegiatanController {
         }).catch((err) => {
             res.status(500).json(err)
         })
+    }
+
+    static readOne(req, res) {
+        const id = req.params.id
+
+        kegiatanProyek.findById(id)
+            .exec()
+            .then((result) => {
+                res.status(200).json(result)
+            }).catch((err) => {
+                res.status(500).json(err)
+            })
     }
 }

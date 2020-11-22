@@ -16,7 +16,7 @@ module.exports = class SDBController {
             updated_at: updated_at
 
         }).then((result) => {
-            res.status(201).json({msg: 'Data Berhasil Ditambah'})
+            res.status(201).json({ msg: 'Data Berhasil Ditambah' })
         }).catch((err) => {
             res.status(500).json(err)
         })
@@ -24,15 +24,15 @@ module.exports = class SDBController {
 
     // Delete data, dapat dari _id
     static delete(req, res) {
-        const id = req.body.id
+        const id = req.params.id
 
-        sdBarang.findByIdAndDelete({
-            _id: id
-        }).then((result) => {
-            res.status(303).json({ msg: 'Data Berhasil Dihapus' })
-        }).catch((err) => {
-            res.status(500).json(err)
-        })
+        sdBarang.findByIdAndDelete(id)
+            .exec()
+            .then((result) => {
+                res.status(303).json({ msg: 'Data Berhasil Dihapus' })
+            }).catch((err) => {
+                res.status(500).json(err)
+            })
     }
 
     // Note: waktu buat halaman untuk update, sertakan data yang ada di kolomnya
@@ -64,10 +64,20 @@ module.exports = class SDBController {
         sdBarang.find({
 
         }).then((result) => {
-            res.status(201).json(result)
+            res.status(200).json(result)
         }).catch((err) => {
             res.status(500).json(err)
         })
+    }
+
+    static readOne(req, res) {
+        const id = req.params.id
+        sdBarang.findById(id)
+            .exec()
+            .then(result => {
+                res.status(200).json(result)
+            })
+            .catch(err => console.log(err))
     }
 
 }

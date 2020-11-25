@@ -7,7 +7,7 @@ module.exports = class SDBController {
     // Tambah data
     static tambah(req, res) {
         const namaBarang = req.body.namaBarang
-        const satuanBarang = req.body.satuanBarang
+        const satuanBarang = req.body.satuan
         const updated_at = Date.now()
 
         sdBarang.create({
@@ -37,7 +37,7 @@ module.exports = class SDBController {
 
     // Note: waktu buat halaman untuk update, sertakan data yang ada di kolomnya
     static update(req, res) {
-        const id = req.body.id
+        const id = req.params.id
         const updated_at = Date.now()
 
         const dataupdate = {
@@ -52,8 +52,8 @@ module.exports = class SDBController {
                 res.status(500).send(err);
             }
             else {
-                console.log("success");
-                res.send(docs)
+                res(docs)
+                res.status(200).send(docs)
             }
         })
     }

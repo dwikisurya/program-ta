@@ -7,8 +7,8 @@ module.exports = class KategoriController {
 
     // Tambah Data
     static tambah(req, res) {
-        const namakategori = req.body.namakategori
-        const deskripsikategori = req.body.deskripsikategori
+        const namakategori = req.body.namaKategori
+        const deskripsikategori = req.body.deskripsiKategori
         const created_at = Date.now()
         const updated_at = Date.now()
 
@@ -39,12 +39,12 @@ module.exports = class KategoriController {
 
     // Update data, dari _id
     static update(req, res) {
-        const id = req.body.id
+        const id = req.params.id
         const updated_at = Date.now()
 
         const dataupdate = {
-            namaKategori: req.body.namakategori,
-            deskripsiKategori: req.body.deskripsikategori,
+            namaKategori: req.body.namaKategori,
+            deskripsiKategori: req.body.deskripsiKategori,
             updated_at: updated_at
         }
 

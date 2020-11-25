@@ -11,7 +11,7 @@ Router.get / .post / .delete / .patch / .put
 
 sdRouter.post('/tambah', SDBController.tambah)
 sdRouter.delete('/:id', SDBController.delete)
-sdRouter.put('/', SDBController.update)
+sdRouter.put('/:id', SDBController.update)
 sdRouter.get('/', SDBController.read)
 sdRouter.get('/:id', SDBController.readOne)
 

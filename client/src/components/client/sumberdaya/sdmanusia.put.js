@@ -1,0 +1,19 @@
+import axios from 'axios'
+
+export default async (reqBody) => {
+    try {
+        let res = await axios({
+            method: 'PUT',
+            url: `http://localhost:5000/sdmanusia/${reqBody._id}`,
+            data: reqBody
+        })
+        console.log(`Status code: ${res.status}`);
+        console.log(`Status text: ${res.statusText}`);
+        console.log(`Request method: ${res.method}`);
+        console.log(`Path: ${res.path}`);
+
+
+    } catch (error) {
+        return error
+    }
+}

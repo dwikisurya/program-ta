@@ -6,11 +6,11 @@ module.exports = class SDMController {
 
     // Tambah data
     static tambah(req, res) {
-        const namaKaryawan = req.body.namakaryawan
+        const namaKaryawan = req.body.namaKaryawan
         const tgl_lahir = req.body.tgl_lahir
         const jk = req.body.jk
         const alamat = req.body.alamat
-        const no_telp = req.body.notelp
+        const no_telp = req.body.no_telp
 
         sdManusia.create({
             namaKaryawan: namaKaryawan,
@@ -20,6 +20,7 @@ module.exports = class SDMController {
             no_telp: no_telp,
         }).then((result) => {
             res.status(201).json(result)
+            console.log(result)
         }).catch((err) => {
             res.status(500).json(err)
         })
@@ -40,19 +41,20 @@ module.exports = class SDMController {
 
     // Update data , dari _id
     static update(req, res) {
-        const id = req.body.id
+        const id = req.params.id
 
         const dataupdate = {
-            namaKaryawan: req.body.namakaryawan,
+            namaKaryawan: req.body.namaKaryawan,
             tgl_lahir: req.body.tgl_lahir,
             jk: req.body.jk,
             alamat: req.body.alamat,
-            no_telp: req.body.notelp
+            no_telp: req.body.no_telp
         }
 
 
         sdManusia.findByIdAndUpdate(id, dataupdate, { new: true }, function (err, docs) {
             if (err) {
+                console.log(err)
                 res.status(500).send(err);
             }
             else {

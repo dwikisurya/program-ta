@@ -6,10 +6,10 @@ module.exports = class KegiatanController {
 
     // Tambah Data
     static tambah(req, res) {
-        const namaKegiatan = req.body.namakegiatan
-        const deskripsiKegiatan = req.body.deskripsikegiatan
-        const satuanKegiatan = req.body.satuankegiatan
-        const hargaSatuan = req.body.hargasatuan
+        const namaKegiatan = req.body.namaKegiatan
+        const deskripsiKegiatan = req.body.deskripsiKegiatan
+        const satuanKegiatan = req.body.satuanKegiatan
+        const hargaSatuan = req.body.hargaSatuan
         const updated_at = Date.now()
 
         kegiatanProyek.create({
@@ -40,14 +40,14 @@ module.exports = class KegiatanController {
 
     // Update data, dari _id
     static update(req, res) {
-        const id = req.body.id
+        const id = req.params.id
         const updated_at = Date.now()
 
         const dataupdate = {
-            namaKegiatan: req.body.namakegiatan,
-            deskripsiKegiatan: req.body.deskripsikegiatan,
-            satuanKegiatan: req.body.satuankegiatan,
-            hargaSatuan: req.body.hargasatuan,
+            namaKegiatan: req.body.namaKegiatan,
+            deskripsiKegiatan: req.body.deskripsiKegiatan,
+            satuanKegiatan: req.body.satuanKegiatan,
+            hargaSatuan: req.body.hargaSatuan,
             updated_at: updated_at
         }
 
@@ -56,6 +56,7 @@ module.exports = class KegiatanController {
                 res.status(500).send(err)
             } else {
                 res.status(200).send(docs)
+                console.log("Sukses")
             }
         })
     }

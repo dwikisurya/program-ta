@@ -12,7 +12,7 @@ Router.get / .post / .delete / .patch / .put
 */
 kategoriproyek.post('/tambah', KategoriController.tambah)
 kategoriproyek.delete('/:id', KategoriController.delete)
-kategoriproyek.put('/', KategoriController.update)
+kategoriproyek.put('/:id', KategoriController.update)
 kategoriproyek.get('/', KategoriController.read)
 kategoriproyek.get('/:id', KategoriController.readOne)
 

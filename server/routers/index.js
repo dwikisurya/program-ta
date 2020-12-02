@@ -20,7 +20,7 @@ router.use('/kegiatanproyek', kegiatanproyek)
 router.use('/kategoriproyek', kategoriproyek)
 router.use('/proyek', proyek)
 router.use('/rab', rabproyek)
-router.use('/schedulling', scheduling)
+router.use('/scheduling', scheduling)
 router.use('/perkembangan', perkembangan)
 
 module.exports = router

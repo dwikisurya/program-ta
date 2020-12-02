@@ -38,6 +38,21 @@ module.exports = class RABController {
 
     }
 
+    // Delete Data
+    
+    static delete(req, res) {
+        const id = req.params.id
+
+        rabproyek.findByIdAndDelete(id)
+            .exec()
+            .then((result) => {
+                res.status(303).json({ msg: 'Data Berhasil Dihapus' })
+            }).catch((err) => {
+                res.status(500).json(err)
+            })
+    }
+
+    // Read One
     static readOne(req, res) {
         const id = req.params.id
         rabproyek.findById(id)
@@ -46,7 +61,7 @@ module.exports = class RABController {
                 select: 'namaProyek'
             }).populate({
                 path: 'idKegiatanProyek',
-                select: 'namaKegiatan deskripsiKegiatan'
+                select: 'namaKegiatan'
             })
             .then((result) => {
                 res.status(200).json(result)

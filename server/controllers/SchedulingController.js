@@ -23,8 +23,14 @@ module.exports = class SchedulingController {
     static read(req, res) {
         scheduling.find()
             .populate({
-                path: 'sch.idKegiatanRab',
-                select: 'uraianPekerjaan'
+                path: 'idRabProyek',
+                model: 'rabproyek',
+                select: 'namaProyek -_id',
+                populate: {
+                    path: 'idProyek',
+                    model: 'proyek',
+                    select: 'namaProyek -_id'
+                }
             })
             .then((result) => {
                 res.status(200).json(result)

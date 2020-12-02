@@ -1,7 +1,72 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Navbar from '../Navbar'
 
+import hitscheduling from '../../client/proyek/scheduling.get'
+
+import hitrab from '../../client/proyek/rab.get'
+
 const Scheduling = () => {
+
+    // Get Data to Table
+    const [scheduling, setScheduling] = useState([])
+
+    const getData = async () => {
+        const schHit = await hitscheduling()
+        if (schHit.status = 200) {
+            setScheduling(schHit.data)
+            console.log(schHit.data)
+        } else {
+            console.log('Error')
+        }
+    }
+
+    // Get data rab
+    const [rab, setRab] = useState([])
+
+    const getRab = async () => {
+        const rabhit = await hitrab()
+        if (rabhit.status = 200) {
+            setRab(rabhit.data)
+        } else {
+            console.log('Error')
+        }
+    }
+
+    const rendertable = () => {
+        return scheduling.map(sch => {
+            return (
+                <tr key={sch._id}>
+                    <td>{sch.idRabProyek.idProyek.namaProyek}</td>
+                    <td>
+                        {rab.map(rabq => {
+                            return (
+                                <tr><th>Uraian Pekerjaan</th>
+                                    <td>{rabq.rab.map(q1 => {
+                                        return (<tr><td>{q1.uraianPekerjaan}</td>
+                                            <td>{sch.sch[q1].perkiraanDurasi}</td>
+                                        </tr>
+                                        )
+                                    })}
+                                    </td>
+                                    <td>{sch.sch.map(q2 => {
+                                        return (<tr><td>{q2.perkiraanDurasi}</td></tr>)
+                                    })}</td>
+                                </tr>
+                            )
+                        })}
+                    </td>
+                </tr>
+            )
+        })
+    }
+
+
+    useEffect(() => {
+        getData()
+        getRab()
+    }, [])
+
+
     return (
         <div className="container-fluid">
             <Navbar />
@@ -11,10 +76,9 @@ const Scheduling = () => {
                         <div className="form-group">
                             <h5>Input Data Scheduling</h5>
                             <label for="inp_idrabscheduling">Data RAB (ambil uraian pekerjaan / simpan uraianpekerjaan ke db)</label>
-                            <select id="country" name="country">
-                                <option value="australia">Australia</option>
-                                <option value="canada">Canada</option>
-                                <option value="usa">USA</option>
+                            <select className="form-control" name="idProyek">
+                                <option>     </option>
+
                             </select>
                         </div>
                         <div className="form-group">
@@ -38,41 +102,14 @@ const Scheduling = () => {
                     </form>
                 </div>
                 <div className="col-md-6">
-                    <table className="table">
+                    <table className="table table-bordered">
                         <thead>
                             <tr>
-                                <th> Product</th>
-                                <th> Payment Taken</th>
-                                <th>Status</th>
+                                <th className="text-center">Nama Proyek</th>
+                                <th className="text-center">Kegiatan RAB</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td> TB - Monthly</td>
-                                <td>01/04/2012</td>
-                                <td> Default</td>
-                            </tr>
-                            <tr>
-                                <td> TB - Monthly</td>
-                                <td>01/04/2012</td>
-                                <td> Default</td>
-                            </tr>
-                            <tr>
-                                <td> TB - Monthly</td>
-                                <td>01/04/2012</td>
-                                <td> Default</td>
-                            </tr>
-                            <tr>
-                                <td> TB - Monthly</td>
-                                <td>01/04/2012</td>
-                                <td> Default</td>
-                            </tr>
-                            <tr>
-                                <td> TB - Monthly</td>
-                                <td>01/04/2012</td>
-                                <td> Default</td>
-                            </tr>
-                        </tbody>
+                        <tbody>{rendertable()}</tbody>
                     </table>
                 </div>
             </div>

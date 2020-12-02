@@ -8,7 +8,13 @@ const proyekSchema = new Schema({
     },
     kategoriProyek: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'kategoriProyek'
+        ref: 'kategoriProyek',
+        required: true
+    },
+    projectManager: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'sdManusia',
+        required: true
     },
     clientProyek: {
         type: String,

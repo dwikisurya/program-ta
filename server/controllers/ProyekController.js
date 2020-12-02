@@ -6,11 +6,12 @@ module.exports = class ProyekController {
 
     // Tambah Data
     static tambah(req, res) {
-        const namaproyek = req.body.namaproyek
-        const clientproyek = req.body.clientproyek
-        const lokasiproyek = req.body.lokasiproyek
-        const statusproyek = req.body.statusproyek
-        const kategoriproyek = req.body.kategoriproyek
+        const namaproyek = req.body.namaProyek
+        const kategoriproyek = req.body.kategoriProyek
+        const projectmanager = req.body.projectManager
+        const clientproyek = req.body.clientProyek
+        const lokasiproyek = req.body.lokasiProyek
+        const statusproyek = req.body.statusProyek
         const created_at = Date.now()
         const updated_at = Date.now()
         const accepted_at = Date.now()
@@ -21,6 +22,7 @@ module.exports = class ProyekController {
             lokasiProyek: lokasiproyek,
             statusProyek: statusproyek,
             kategoriProyek: kategoriproyek,
+            projectManager: projectmanager,
             created_at: created_at,
             updated_at: updated_at,
             accepted_at: accepted_at
@@ -28,6 +30,7 @@ module.exports = class ProyekController {
             res.status(201).json({ msg: 'Data Berhasil Ditambah' })
         }).catch((err) => {
             res.status(500).json(err)
+            console.log(err)
         })
     }
 
@@ -36,12 +39,13 @@ module.exports = class ProyekController {
         const updated_at = Date.now()
 
         const dataupdate = {
-            namaProyek: req.body.namaproyek,
-            clientProyek: req.body.clientproyek,
-            lokasiProyek: req.body.lokasiproyek,
-            statusProyek: req.body.statusproyek,
-            updated_at: updated_at,
-            accepted_at: accepted_at
+            namaProyek: req.body.namaProyek,
+            clientProyek: req.body.clientProyek,
+            lokasiProyek: req.body.lokasiProyek,
+            statusProyek: req.body.statusProyek,
+            projectManager: req.body.projectManager,
+            kategoriProyek: req.body.kategoriProyek,
+            updated_at: updated_at
         }
 
         proyek.findByIdAndUpdate(id, dataupdate, { new: true }, function (err, docs) {
@@ -67,17 +71,20 @@ module.exports = class ProyekController {
 
     static read(req, res) {
 
-        proyek.find().populate({
-            path: 'kategoriProyek',
-            select: 'namaKategori', // populate nama kategori dari idkategoriproyek
-            populate: {
+        proyek.find()
+            .populate({
                 path: 'kategoriProyek',
-            }
-        }).then((result) => {
-            res.status(200).json(result)
-        }).catch((err) => {
-            res.status(500).json(err)
-        })
+                select: 'namaKategori'
+            }).populate({
+                path: 'projectManager',
+                select: 'namaKaryawan'
+            })
+            .then((result) => {
+                res.status(200).json(result)
+            }).catch((err) => {
+                res.status(500).json(err)
+
+            })
     }
 
     static readOne(req, res) {

@@ -12,5 +12,6 @@ Router.get / .post / .delete / .patch / .put
 rabRouter.post('/tambah', RABController.tambah)
 rabRouter.get('/', RABController.read)
 rabRouter.get('/:id', RABController.readOne)
+rabRouter.delete('/:id', RABController.delete)
 
 module.exports = rabRouter

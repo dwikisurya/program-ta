@@ -4,13 +4,9 @@ const Schema = mongoose.Schema
 const schedulingSchema = new Schema({
     idRabProyek: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'rabProyek'
+        ref: 'rabproyek'
     },
     sch: [{
-        idKegiatanRab: {
-            type: mongoose.Types.ObjectId,
-            ref: 'rabProyek'
-        },
         perkiraanDurasi: {
             type: Number,
         },

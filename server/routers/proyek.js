@@ -7,7 +7,7 @@ const Authentication = require('../middlewares/authentication')
 
 proyek.post('/tambah', ProyekController.tambah)
 proyek.get('/', ProyekController.read)
-proyek.put('/', ProyekController.update)
+proyek.put('/:id', ProyekController.update)
 proyek.delete('/:id', ProyekController.delete)
 proyek.get('/:id', ProyekController.readOne)
 

@@ -13,5 +13,6 @@ rabRouter.post('/tambah', RABController.tambah)
 rabRouter.get('/', RABController.read)
 rabRouter.get('/:id', RABController.readOne)
 rabRouter.delete('/:id', RABController.delete)
+rabRouter.put('/:id', RABController.put)
 
 module.exports = rabRouter

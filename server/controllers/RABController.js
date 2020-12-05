@@ -1,6 +1,7 @@
 const rabproyek = require('../models/rabproyek')
 const { json } = require('body-parser')
 const jwt = require('jsonwebtoken')
+const { update } = require('../models/rabproyek')
 
 module.exports = class RABController {
 
@@ -8,12 +9,17 @@ module.exports = class RABController {
     static tambah(req, res) {
         const idproyek = req.body.idProyek
         const rabdarirequst = req.body.rab
+        const updated_at = Date.now()
+        const status = "Created"
 
         rabproyek.create({
             idProyek: idproyek,
-            rab: rabdarirequst
+            rab: rabdarirequst,
+            updated_at: updated_at,
+            status: status
         }).then((result) => {
             res.status(201).json({ msg: 'Data Berhasil Ditambah' })
+            console.log(result)
         }).catch((err) => {
             res.status(500).json(err)
         })
@@ -39,7 +45,7 @@ module.exports = class RABController {
     }
 
     // Delete Data
-    
+
     static delete(req, res) {
         const id = req.params.id
 
@@ -70,4 +76,26 @@ module.exports = class RABController {
             })
     }
 
+    // Put
+    static put(req, res) {
+        const id = req.params.id
+        const updated_at = Date.now()
+
+
+        const dataupdate = {
+            idProyek: req.body.idProyek,
+            rab: req.body.rab,
+            updated_at: updated_at
+        }
+
+        rabproyek.findByIdAndUpdate(id, dataupdate, { new: true }, function (err, docs) {
+            if (err) {
+                res.status(500).send(err)
+                console.log(dataupdate)
+            } else {
+                res.status(200).send(docs)
+            }
+        })
+
+    }
 }

@@ -6,7 +6,7 @@ const rabSchema = new Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'proyek'
     },
-    rab: {
+    rab: [{
         uraianPekerjaan: String,
         idKegiatanProyek:
             [{
@@ -16,10 +16,14 @@ const rabSchema = new Schema({
         volume: [{
             type: Number
         }],
+        hargaKegiatan: [{
+            type: Number,
+        }],
         totalHarga: Number,
-        accepted_at: Date
-    },
-
+    }],
+    status: String,
+    accepted_at: Date,
+    updated_at: Date
 })
 
 const rabproyek = mongoose.model('rabproyek', rabSchema)

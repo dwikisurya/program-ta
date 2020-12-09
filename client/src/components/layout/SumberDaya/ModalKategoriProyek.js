@@ -2,8 +2,8 @@ import React, { Fragment, useState } from 'react'
 import putkategori from '../../client/sumberdaya/kategoriproyek.put'
 
 
-const ModalKategoriProyek = ({ datakategori }) => {
-    const [kategoriProyek, setkategoriData] = useState(datakategori)
+const ModalKategoriProyek = ({ rowData }) => {
+    const [kategoriProyek, setkategoriData] = useState(rowData)
 
     // Handler Change
     const handlerChange = (e) => {
@@ -16,10 +16,10 @@ const ModalKategoriProyek = ({ datakategori }) => {
             if (kategoriProyek !== null) {
                 console.log(kategoriProyek)
                 putkategori(kategoriProyek)
-                console.log("Data Berhasil di update")
-                // window.location = "/";
+                alert("Data berhasil di update")
+                window.location = "/sumberdaya/kategori";
             } else {
-                console.log("Data Gagal di update")
+                alert("Data gagal di update")
             }
 
         } catch (err) {

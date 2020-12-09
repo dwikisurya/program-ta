@@ -1,8 +1,8 @@
 import React, { Fragment, useState } from 'react'
 import putsdb from '../../client/sumberdaya/sdbarang.put'
 
-const ModalSDB = ({ datasdb }) => {
-    const [sdbdata, setSdbdata] = useState(datasdb)
+const ModalSDB = ({ rowData }) => {
+    const [sdbdata, setSdbdata] = useState(rowData)
 
     // Handler Change
     const handlerChange = (e) => {
@@ -15,10 +15,10 @@ const ModalSDB = ({ datasdb }) => {
             if (sdbdata !== null) {
                 console.log(sdbdata)
                 putsdb(sdbdata)
-                console.log("Data Berhasil di update")
-                // window.location = "/";
+                alert("Data berhasil di update")
+                // window.location = "/sumberdaya/barang";
             } else {
-                console.log("Data Gagal di update")
+                alert("Gagal update data")
             }
 
         } catch (err) {
@@ -32,13 +32,13 @@ const ModalSDB = ({ datasdb }) => {
                 type="button"
                 className="btn btn-warning"
                 data-toggle="modal"
-                data-target={`#_id${datasdb._id}`}
+                data-target={`#_id${rowData._id}`}
             >Edit</button>
 
             <div
                 className="modal"
-                id={`_id${datasdb._id}`}
-                onClick={() => setSdbdata(datasdb)}
+                id={`_id${rowData._id}`}
+                onClick={() => setSdbdata(rowData)}
             >
                 <div className="modal-dialog">
                     <div className="modal-content">
@@ -49,26 +49,35 @@ const ModalSDB = ({ datasdb }) => {
                                 type="button"
                                 className="close"
                                 data-dismiss="modal"
-                                onClick={() => setSdbdata(datasdb)}></button>
+                                onClick={() => setSdbdata(rowData)}></button>
                         </div>
 
                         <div className="modal-body">
-                            <label for="namaBarang">Nama Barang</label>
-                            <input
-                                type="text"
-                                classNameName="form-control"
-                                name="namaBarang"
-                                placeholder={datasdb.namaBarang}
-                                onInput={handlerChange.bind(this)}
-                            /><br></br>
-                            <label for="namaBarang">Satuan</label>
-                            <input
-                                type="text"
-                                classNameName="form-control"
-                                name="satuanBarang"
-                                placeholder={datasdb.satuanBarang}
-                                onInput={handlerChange.bind(this)}
-                            />
+                            <table>
+                                <th></th>
+                                <th></th>
+                            </table>
+                            <tr>
+                                <td><label for="namaBarang">Nama Barang</label></td>
+                                <td><input
+                                    type="text"
+                                    classNameName="form-control"
+                                    name="namaBarang"
+
+                                    placeholder={rowData.namaBarang}
+                                    onInput={handlerChange.bind(this)}
+                                /></td>
+                            </tr>
+                            <tr>
+                                <td><label for="satuanBarang">Satuan Barang</label></td>
+                                <td><input
+                                    type="text"
+                                    classNameName="form-control"
+                                    name="satuanBarang"
+                                    placeholder={rowData.satuanBarang}
+                                    onInput={handlerChange.bind(this)}
+                                /></td>
+                            </tr>
                         </div>
 
                         <div className="modal-footer">
@@ -84,7 +93,7 @@ const ModalSDB = ({ datasdb }) => {
                                 type="button"
                                 className="btn btn-danger"
                                 data-dismiss="modal"
-                                onClick={() => setSdbdata(datasdb.namaBarang)}
+                                onClick={() => setSdbdata(rowData)}
                             >
                                 Close
               </button>

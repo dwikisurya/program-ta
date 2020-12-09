@@ -1,6 +1,8 @@
 import React, { useState, useEffect, Fragment } from 'react'
 import Navbar from '../Navbar'
 import ModalRAB from './ModalRAB'
+import _ from 'lodash'
+import MaterialTable from "material-table"
 
 import hitrab from '../../client/proyek/rab.get'
 import deleterab from '../../client/proyek/rab.delete'
@@ -13,7 +15,6 @@ const RAB = () => {
 
     // Get
     const [rab, setRab] = useState([])
-
     const getData = async () => {
         const rabhit = await hitrab()
         if (rabhit.status = 200) {
@@ -23,32 +24,28 @@ const RAB = () => {
         }
     }
 
-    const rendertable = () => {
-        return rab.map(rabq => {
-            return (
-                <tr>
-                    <td>{rabq.idProyek.namaProyek}</td>
-                    <td>{rabq.rab.map(q1 => {
-                        return (
-                            <tr>
-                                <th>Uraian</th>
-                                <td>{q1.uraianPekerjaan}</td>
-                                <th>Kegiatan</th>
-                                <td>
-                                    {q1.idKegiatanProyek.map(q2 => {
-                                        return (<td>{q2.namaKegiatan}</td>)
-                                    })}</td>
-                            </tr>
-                        )
-                    })}</td>
-                    <td>{rabq.status}</td>
-                    <td><ModalRAB datarab={rabq} /></td>
-                    <td>   <button className="btn-sm btn-danger" type="button" data-toggle="tooltip" data-placement="top" title="Delete"
-                        onClick={(e) => deleteRow(rabq._id, e)}>Delete</button></td>
-                </tr>
-            )
-        })
-    }
+    // To show data to datatable
+    var groups1 = _.groupBy(rab, function (value) {
+        return value._id + '#' + value.idProyek.namaProyek;
+    });
+
+    var dataqq = _.map(groups1, function (group) {
+        return {
+            id: group[0]._id,
+            namaProyek: group[0].idProyek.namaProyek,
+            rab: group[0].rab,
+            status: group[0].status
+        }
+    });
+
+    const huwala = _.flatMap(dataqq, ({ id, namaProyek, rab, status }) =>
+        _.flatMap(rab, ({ uraianPekerjaan, idKegiatanProyek }) => ({ id: id, namaProyek: namaProyek, uraian: uraianPekerjaan, idKegiatanProyek: idKegiatanProyek, status: status }))
+    )
+
+    const result = _.flatMap(huwala, ({ id, namaProyek, uraian, idKegiatanProyek, status }) =>
+        _.map(idKegiatanProyek, tag => ({ id, namaProyek, uraian, status, ...tag }))
+    );
+    console.log(result)
 
     // Populate Select For Proyek 
     const [dataProyek, setDataProyek] = useState([])
@@ -72,7 +69,6 @@ const RAB = () => {
 
     // Populate Select For Pekerjaan 
     const [dataPekerjaan, setDataPekerjaan] = useState([])
-
     const getPekerjaan = async () => {
         const pekerjaan = await hitpekerjaan()
         if (pekerjaan.status === 200) {
@@ -92,7 +88,7 @@ const RAB = () => {
 
     // Form 
     const [formdata, setFormData] = useState([
-        { uraianPekerjaan: '', idKegiatanProyek: {}, hargaKegiatan: {}, volume: '', totalHarga: '' }
+        { uraianPekerjaan: '', idKegiatanProyek: {}, hargaKegiatan: {}, volume: '', totalHarga: '', grandTotal: '' }
     ]);
 
     const [formproyek, setFormProyek] = useState([])
@@ -123,24 +119,56 @@ const RAB = () => {
         });
 
         const sumAll = sum.reduce((result, number) => result + number);
-
         values[index].totalHarga = sumAll
 
         setFormData(values)
+
     };
 
 
     const handleSubmit = e => {
         e.preventDefault();
-        console.log("idproyek", formproyek)
-        console.log("rab", formdata);
-        if (formdata !== null && formproyek !== null) {
-            console.log('Success')
-            const idform = formproyek.idProyek
-            postrab(formdata, idform)
-            window.location = "/"
+        const idform = formproyek.idProyek
+        var groups1 = _.groupBy(rab, function (value) {
+            return value.idProyek;
+        });
+
+        var data = _.map(groups1, function (group) {
+            return {
+                count: _.countBy(group, 'idProyek.namaProyek')
+            }
+        });
+
+        var groups2 = _.groupBy(dataProyek, function (value) {
+            return value.namaProyek;
+        });
+
+        var data1 = _.map(groups2, function (group) {
+            return {
+                idProyek: group[0]._id,
+                namaProyek: group[0].namaProyek,
+            }
+        });
+        let b = ''
+        data1.map(d1 => {
+            if (idform === d1.idProyek) {
+                return b = d1.namaProyek
+            }
+        })
+        let c = ''
+        data.map(d1 => {
+            return c = d1.count[b]
+        })
+
+        if (formdata !== null && formproyek !== null && c < 1 || c === undefined) {
+            let total = 0
+            for (let i = 0; i < formdata.length; i++) {
+                total += formdata[i].totalHarga
+            }
+            postrab(formdata, idform, total)
+            window.location = "/proyek/rab"
         } else {
-            console.log('Error')
+            alert(`Data RAB:` + b + ` sudah dibuat, silahkan edit atau tambahkan data RAB lainnya`)
         }
     };
 
@@ -168,6 +196,7 @@ const RAB = () => {
             })
     }
 
+
     useEffect(() => {
         getData()
         getProyek()
@@ -180,12 +209,12 @@ const RAB = () => {
             <div className="container-fluid">
                 <div className="row clearfix">
 
-                    <div className="col-md-6">
+                    <div className="col-md-5">
                         <h5>Input RAB</h5>
                         <form onSubmit={handleSubmit}>
                             <div className="form-row">
                                 <label htmlFor="idProyek">ID Proyek</label>
-                                <select className="form-control" id="idProyek" name="idProyek" onChange={handlerChange}>
+                                <select className="form-control" id="idProyek" name="idProyek" onChange={handlerChange} required>
                                     <option value="">     </option>
                                     {renderProyek()}
                                 </select>
@@ -194,11 +223,10 @@ const RAB = () => {
                                     <Fragment key={`${formdataq}~${index}`}>
                                         <div className="form-group col-sm-4">
                                             <label htmlFor="volume">Id Pekerjaan</label>
-                                            <select multiple class="form-control" id="idPekerjaan" name="idPekerjaan" onChange={event => handleInputChange(index, event)}>
+                                            <select multiple class="form-control" id="idPekerjaan" name="idPekerjaan" onChange={event => handleInputChange(index, event)} required>
                                                 {renderPekerjaan()}
                                             </select>
                                         </div>
-
 
                                         <div className="form-group col-sm-2">
                                             <label htmlFor="volume">Volume</label>
@@ -209,6 +237,7 @@ const RAB = () => {
                                                 name="volume"
                                                 value={formdataq.volume}
                                                 onChange={event => handleInputChange(index, event)}
+                                                required
                                             />
                                         </div>
 
@@ -221,28 +250,19 @@ const RAB = () => {
                                                 name="uraianPekerjaan"
                                                 value={formdataq.uraianPekerjaan}
                                                 onChange={event => handleInputChange(index, event)}
+                                                required
                                             />
                                         </div>
-
-
-
-
 
                                         <div className="form-group col-sm-2">
                                             <button
                                                 className="btn btn-link"
                                                 type="button"
-                                                onClick={() => handleRemoveFields(index)}
-                                            >
-                                                -
-                    </button>
+                                                onClick={() => handleRemoveFields(index)}>-</button>
                                             <button
                                                 className="btn btn-link"
                                                 type="button"
-                                                onClick={() => handleAddFields()}
-                                            >
-                                                +
-                    </button>
+                                                onClick={() => handleAddFields()}> + </button>
                                         </div>
                                     </Fragment>
                                 ))}
@@ -250,31 +270,57 @@ const RAB = () => {
                             <div className="submit-button">
                                 <button
                                     className="btn btn-primary mr-2"
-                                    type="submit"
+                                    type="submit"> Save</button>
 
-                                >
-                                    Save
-            </button>
+
+
                             </div>
                         </form>
-
                     </div>
 
-                    <div className="col-md-6">
-                        <table className="table table-responsive-md" id="Proyek">
-                            <thead>
-                                <tr>
-                                    <th>Nama Proyek</th>
-                                    <th>Uraian</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>{rendertable()}</tbody>
-                        </table>
+                    <div className="col-md-7">
+                        <MaterialTable
+                            title="Data RAB"
+                            columns={[
+                                { title: "ID", field: "id", hidden: true },
+                                { title: "Nama Proyek", field: "namaProyek", defaultGroupOrder: 0 },
+                                { title: "Uraian", field: "uraian", defaultGroupOrder: 0 },
+                                {
+                                    title: "Nama Kegiatan", field: "namaKegiatan",
+                                },
+                                { title: "Nama Kegiatan", field: "status" },
+                                {
+                                    title: "Edit",
+                                    field: "internal_action",
+                                    tooltip: 'Edit Data Hanya Berdasar Proyek',
+                                    editable: false,
+                                    render: (rowData) =>
+                                        rowData && (
+                                            <td><ModalRAB rowData={rowData} /></td>
+                                        )
+                                },
+                            ]}
+                            data={(result)}
+                            options={{
+                                grouping: true
+                            }}
+                            actions={[
+                                {
+                                    icon: 'delete',
+                                    tooltip: 'Delete Data',
+                                    onClick: (e, rowData) => deleteRow(rowData.id, e)
+                                }
+                            ]}
+                            options={{
+                                actionsColumnIndex: -1
+                            }}
+
+                        />
                     </div>
                 </div>
             </div >
         </div >
+
     );
 
 }

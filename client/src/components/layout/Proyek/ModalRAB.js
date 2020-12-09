@@ -5,8 +5,8 @@ import hitpekerjaan from '../../client/sumberdaya/kegiatanproyek.get'
 
 import putrab from '../../client/proyek/rab.put'
 
-const ModalRAB = ({ datarab }) => {
-    const [rab, setRab] = useState(datarab)
+const ModalRAB = ({ rowData }) => {
+    const [rab, setRab] = useState(rowData)
 
     const [formdata, setFormData] = useState([
         { uraianPekerjaan: '', idKegiatanProyek: {}, hargaKegiatan: {}, volume: '', totalHarga: '' }
@@ -64,14 +64,14 @@ const ModalRAB = ({ datarab }) => {
         e.preventDefault();
         try {
             if (formdata !== null && formproyek !== null) {
-                putrab(formdata, formproyek.idProyek, rab._id)
-                //         // console.log("Data Berhasil di update")
-                //         window.location = "/"
+                putrab(formdata, formproyek.idProyek, rowData.id)
+                alert(`Berhasil Update data RAB`)
+                window.location = "/proyek/rab"
             } else {
-                //         console.log("Data Gagal di update")
+                alert(`Data RAB sudah dibuat, silahkan edit atau tambahkan data RAB lainnya`)
             }
         } catch (err) {
-            //     console.error(err.message);
+            console.error(err.message);
         }
     };
 
@@ -129,13 +129,13 @@ const ModalRAB = ({ datarab }) => {
                 type="button"
                 className="btn btn-warning"
                 data-toggle="modal"
-                data-target={`#_id${rab._id}`}
+                data-target={`#_id${rowData.id}`}
             >Edit</button>
 
             <div
                 className="modal"
-                id={`_id${rab._id}`}
-                onClick={() => setRab(rab)}
+                id={`_id${rowData.id}`}
+                onClick={() => setRab(rowData)}
             >
                 <div className="modal-dialog">
                     <div className="modal-content">
@@ -146,7 +146,7 @@ const ModalRAB = ({ datarab }) => {
                                 type="button"
                                 className="close"
                                 data-dismiss="modal"
-                                onClick={() => setRab(rab)}></button>
+                                onClick={() => setRab(rowData)}></button>
                         </div>
 
                         <div className="modal-body">
@@ -192,10 +192,6 @@ const ModalRAB = ({ datarab }) => {
                                                 onChange={event => handleInputChange(index, event)}
                                             />
                                         </div>
-
-
-
-
 
                                         <div className="form-group col-sm-2">
                                             <button

@@ -2,9 +2,8 @@ import React, { Fragment, useState } from 'react'
 import putsdm from '../../client/sumberdaya/sdmanusia.put'
 
 
-const ModalSDM = ({ datasdm }) => {
-    const [sdmdata, setsdbmData] = useState(datasdm)
-
+const ModalSDM = ({ rowData }) => {
+    const [sdmdata, setsdbmData] = useState(rowData)
     // Handler Change
     const handlerChange = (e) => {
         setsdbmData(sdmdata => ({ ...sdmdata, [e.target.name]: e.target.value }));
@@ -17,7 +16,7 @@ const ModalSDM = ({ datasdm }) => {
                 console.log(sdmdata)
                 putsdm(sdmdata)
                 console.log("Data Berhasil di update")
-                window.location = "/";
+                window.location = "/sumberdaya/manusia"
             } else {
                 console.log("Data Gagal di update")
             }
@@ -33,13 +32,13 @@ const ModalSDM = ({ datasdm }) => {
                 type="button"
                 className="btn btn-warning"
                 data-toggle="modal"
-                data-target={`#_id${datasdm._id}`}
+                data-target={`#_id${rowData._id}`}
             >Edit</button>
 
             <div
                 className="modal"
-                id={`_id${datasdm._id}`}
-                onClick={() => setsdbmData(datasdm)}
+                id={`_id${rowData._id}`}
+                onClick={() => setsdbmData(rowData)}
             >
                 <div className="modal-dialog">
                     <div className="modal-content">
@@ -50,7 +49,7 @@ const ModalSDM = ({ datasdm }) => {
                                 type="button"
                                 className="close"
                                 data-dismiss="modal"
-                                onClick={() => setsdbmData(datasdm)}></button>
+                                onClick={() => setsdbmData(rowData)}></button>
                         </div>
 
                         <div className="modal-body">
@@ -64,8 +63,8 @@ const ModalSDM = ({ datasdm }) => {
                                     type="text"
                                     classNameName="form-control"
                                     name="namaKaryawan"
-                                    defaultValue={datasdm.namaKaryawan}
-                                    placeholder={datasdm.namaKaryawan}
+                                    defaultValue={rowData.namaKaryawan}
+                                    placeholder={rowData.namaKaryawan}
                                     onInput={handlerChange.bind(this)}
                                 /></td>
                             </tr>
@@ -75,8 +74,8 @@ const ModalSDM = ({ datasdm }) => {
                                     type="date"
                                     classNameName="form-control"
                                     name="tgl_lahir"
-                                    defaultValue={datasdm.tgl_lahir}
-                                    placeholder={datasdm.tgl_lahir}
+                                    defaultValue={rowData.tgl_lahir}
+                                    placeholder={rowData.tgl_lahir}
                                     onInput={handlerChange.bind(this)}
                                 /></td>
                             </tr>
@@ -86,8 +85,8 @@ const ModalSDM = ({ datasdm }) => {
                                     type="text"
                                     classNameName="form-control"
                                     name="jk"
-                                    defaultValue={datasdm.jk}
-                                    placeholder={datasdm.jk}
+                                    defaultValue={rowData.jk}
+                                    placeholder={rowData.jk}
                                     onInput={handlerChange.bind(this)}
                                 /></td>
                             </tr>
@@ -97,8 +96,8 @@ const ModalSDM = ({ datasdm }) => {
                                     type="text"
                                     classNameName="form-control"
                                     name="alamat"
-                                    defaultValue={datasdm.alamat}
-                                    placeholder={datasdm.alamat}
+                                    defaultValue={rowData.alamat}
+                                    placeholder={rowData.alamat}
                                     onInput={handlerChange.bind(this)}
                                 /></td>
                             </tr>
@@ -108,8 +107,8 @@ const ModalSDM = ({ datasdm }) => {
                                     type="text"
                                     classNameName="form-control"
                                     name="no_telp"
-                                    defaultValue={datasdm.no_telp}
-                                    placeholder={datasdm.no_telp}
+                                    defaultValue={rowData.no_telp}
+                                    placeholder={rowData.no_telp}
                                     onInput={handlerChange.bind(this)}
                                 /></td>
                             </tr>
@@ -128,7 +127,7 @@ const ModalSDM = ({ datasdm }) => {
                                 type="button"
                                 className="btn btn-danger"
                                 data-dismiss="modal"
-                                onClick={() => setsdbmData(datasdm)}
+                                onClick={() => setsdbmData(rowData)}
                             >
                                 Close
               </button>

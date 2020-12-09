@@ -4,7 +4,7 @@ export default async (reqBody) => {
     try {
         let res = await axios({
             method: 'PUT',
-            url: `http://localhost:5000/kegiatanproyek/${reqBody._id}`,
+            url: `http://localhost:5000/kegiatanproyek/${reqBody.id}`,
             data: reqBody
         })
         console.log(`Status code: ${res.status}`);

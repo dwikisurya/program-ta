@@ -6,19 +6,19 @@ import hitkategori from '../../client/sumberdaya/kategoriproyek.get'
 import hitsdm from '../../client/sumberdaya/sdmanusia.get'
 
 
-const ModalProyek = ({ dataproyek }) => {
-    const [proyek, setProyek] = useState(dataproyek)
+const ModalProyek = ({ rowData }) => {
+    const [proyekData, setProyekData] = useState(rowData)
 
     // Handler Change
     const handlerChange = (e) => {
-        setProyek(proyek => ({ ...proyek, [e.target.name]: e.target.value }));
+        setProyekData(proyek => ({ ...proyek, [e.target.name]: e.target.value }));
     }
 
     const updateDescription = async (e) => {
         e.preventDefault();
         try {
-            if (proyek !== null) {
-                putproyek(proyek)
+            if (proyekData !== null) {
+                putproyek(proyekData)
                 // console.log("Data Berhasil di update")
                 window.location = "/"
             } else {
@@ -77,13 +77,13 @@ const ModalProyek = ({ dataproyek }) => {
                 type="button"
                 className="btn btn-warning"
                 data-toggle="modal"
-                data-target={`#_id${proyek._id}`}
+                data-target={`#_id${rowData.id}`}
             >Edit</button>
 
             <div
                 className="modal"
-                id={`_id${proyek._id}`}
-                onClick={() => setProyek(proyek)}
+                id={`_id${rowData.id}`}
+                onClick={() => setProyekData(proyekData)}
             >
                 <div className="modal-dialog">
                     <div className="modal-content">
@@ -94,7 +94,7 @@ const ModalProyek = ({ dataproyek }) => {
                                 type="button"
                                 className="close"
                                 data-dismiss="modal"
-                                onClick={() => setProyek(proyek)}></button>
+                                onClick={() => setProyekData(proyekData)}></button>
                         </div>
 
                         <div className="modal-body">
@@ -108,8 +108,8 @@ const ModalProyek = ({ dataproyek }) => {
                                     type="text"
                                     classNameName="form-control"
                                     name="namaProyek"
-                                    defaultValue={proyek.namaProyek}
-                                    placeholder={proyek.namaProyek}
+                                    defaultValue={proyekData.namaProyek}
+                                    placeholder={proyekData.namaProyek}
                                     onInput={handlerChange.bind(this)}
                                 /></td>
                             </tr>
@@ -131,8 +131,8 @@ const ModalProyek = ({ dataproyek }) => {
                                     type="text"
                                     classNameName="form-control"
                                     name="clientProyek"
-                                    defaultValue={proyek.clientProyek}
-                                    placeholder={proyek.clientProyek}
+                                    defaultValue={proyekData.clientProyek}
+                                    placeholder={proyekData.clientProyek}
                                     onInput={handlerChange.bind(this)}
                                 /></td>
                             </tr>
@@ -142,8 +142,8 @@ const ModalProyek = ({ dataproyek }) => {
                                     type="text"
                                     classNameName="form-control"
                                     name="lokasiProyek"
-                                    defaultValue={proyek.lokasiProyek}
-                                    placeholder={proyek.lokasiProyek}
+                                    defaultValue={proyekData.lokasiProyek}
+                                    placeholder={proyekData.lokasiProyek}
                                     onInput={handlerChange.bind(this)}
                                 /></td>
                             </tr>
@@ -153,8 +153,8 @@ const ModalProyek = ({ dataproyek }) => {
                                     type="text"
                                     classNameName="form-control"
                                     name="statusProyek"
-                                    defaultValue={proyek.statusProyek}
-                                    placeholder={proyek.statusProyek}
+                                    defaultValue={proyekData.statusProyek}
+                                    placeholder={proyekData.statusProyek}
                                     onInput={handlerChange.bind(this)}
                                 /></td>
                             </tr>
@@ -173,7 +173,7 @@ const ModalProyek = ({ dataproyek }) => {
                                 type="button"
                                 className="btn btn-danger"
                                 data-dismiss="modal"
-                                onClick={() => setProyek(proyek)}
+                                onClick={() => setProyekData(proyekData)}
                             >
                                 Close
               </button>

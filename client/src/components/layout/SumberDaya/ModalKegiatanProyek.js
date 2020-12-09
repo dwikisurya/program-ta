@@ -1,8 +1,8 @@
 import React, { Fragment, useState } from 'react'
 import putkegiatan from '../../client/sumberdaya/kegiatanproyek.put'
 
-const ModalKegiatanProyek = ({ datakegiatan }) => {
-    const [kegiatanProyek, setkegiatanData] = useState(datakegiatan)
+const ModalKegiatanProyek = ({ rowData }) => {
+    const [kegiatanProyek, setkegiatanData] = useState(rowData)
 
     // Handler Change
     const handlerChange = (e) => {
@@ -13,10 +13,10 @@ const ModalKegiatanProyek = ({ datakegiatan }) => {
         e.preventDefault();
         try {
             if (kegiatanProyek !== null) {
-                // console.log(kegiatanProyek)
+                console.log(kegiatanProyek)
                 putkegiatan(kegiatanProyek)
                 // console.log("Data Berhasil di update")
-                window.location = "/";
+                // window.location = "/";
             } else {
                 console.log("Data Gagal di update")
             }
@@ -31,13 +31,13 @@ const ModalKegiatanProyek = ({ datakegiatan }) => {
                 type="button"
                 className="btn btn-warning"
                 data-toggle="modal"
-                data-target={`#_id${kegiatanProyek._id}`}
+                data-target={`#_id${rowData.id}`}
             >Edit</button>
 
             <div
                 className="modal"
-                id={`_id${kegiatanProyek._id}`}
-                onClick={() => setkegiatanData(kegiatanProyek)}
+                id={`_id${rowData.id}`}
+                onClick={() => setkegiatanData(rowData)}
             >
                 <div className="modal-dialog">
                     <div className="modal-content">
@@ -48,7 +48,7 @@ const ModalKegiatanProyek = ({ datakegiatan }) => {
                                 type="button"
                                 className="close"
                                 data-dismiss="modal"
-                                onClick={() => setkegiatanData(kegiatanProyek)}></button>
+                                onClick={() => setkegiatanData(rowData)}></button>
                         </div>
 
                         <div className="modal-body">
@@ -62,8 +62,8 @@ const ModalKegiatanProyek = ({ datakegiatan }) => {
                                     type="text"
                                     classNameName="form-control"
                                     name="namaKegiatan"
-                                    defaultValue={kegiatanProyek.namaKegiatan}
-                                    placeholder={kegiatanProyek.namaKegiatan}
+
+                                    placeholder={rowData.namaKegiatan}
                                     onInput={handlerChange.bind(this)}
                                 /></td>
                             </tr>
@@ -73,8 +73,8 @@ const ModalKegiatanProyek = ({ datakegiatan }) => {
                                     type="text"
                                     classNameName="form-control"
                                     name="deskripsiKegiatan"
-                                    defaultValue={kegiatanProyek.deskripsiKegiatan}
-                                    placeholder={kegiatanProyek.deskripsiKegiatan}
+
+                                    placeholder={rowData.deskripsiKegiatan}
                                     onInput={handlerChange.bind(this)}
                                 /></td>
                             </tr>
@@ -84,8 +84,8 @@ const ModalKegiatanProyek = ({ datakegiatan }) => {
                                     type="text"
                                     classNameName="form-control"
                                     name="satuanKegiatan"
-                                    defaultValue={kegiatanProyek.satuanKegiatan}
-                                    placeholder={kegiatanProyek.satuanKegiatan}
+
+                                    placeholder={rowData.satuanKegiatan}
                                     onInput={handlerChange.bind(this)}
                                 /></td>
                             </tr>
@@ -95,8 +95,8 @@ const ModalKegiatanProyek = ({ datakegiatan }) => {
                                     type="number"
                                     classNameName="form-control"
                                     name="hargaSatuan"
-                                    defaultValue={kegiatanProyek.hargaSatuan}
-                                    placeholder={kegiatanProyek.hargaSatuan}
+
+                                    placeholder={rowData.hargaSatuan}
                                     onInput={handlerChange.bind(this)}
                                 /></td>
                             </tr>
@@ -115,7 +115,7 @@ const ModalKegiatanProyek = ({ datakegiatan }) => {
                                 type="button"
                                 className="btn btn-danger"
                                 data-dismiss="modal"
-                                onClick={() => setkegiatanData(kegiatanProyek)}
+                                onClick={() => setkegiatanData(rowData)}
                             >
                                 Close
               </button>

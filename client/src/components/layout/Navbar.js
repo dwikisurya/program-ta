@@ -16,10 +16,10 @@ const Navbar = () => {
                                 Sumber Daya
                          </a>
                             <div className="dropdown-menu" aria-labelledby="navbarDropdown">
-                                <a className="dropdown-item" href="#">Sumber Daya Barang</a>
-                                <a className="dropdown-item" href="#">Sumber Daya Manusia</a>
-                                <a className="dropdown-item" href="#">Kegiatan Proyek</a>
-                                <a className="dropdown-item" href="#">Kategori Proyek</a>
+                                <a className="dropdown-item" href="/sumberdaya/barang">Sumber Daya Barang</a>
+                                <a className="dropdown-item" href="/sumberdaya/manusia">Sumber Daya Manusia</a>
+                                <a className="dropdown-item" href="/sumberdaya/kegiatan">Kegiatan Proyek</a>
+                                <a className="dropdown-item" href="/sumberdaya/kategori">Kategori Proyek</a>
                             </div>
                         </li>
 
@@ -28,14 +28,14 @@ const Navbar = () => {
                                 Proyek
                          </a>
                             <div className="dropdown-menu" aria-labelledby="navbarDropdown">
-                                <a className="dropdown-item" href="#">Proyek</a>
-                                <a className="dropdown-item" href="#">RAB</a>
-                                <a className="dropdown-item" href="#">Scheduling</a>
+                                <a className="dropdown-item" href="/proyek">Proyek</a>
+                                <a className="dropdown-item" href="/proyek/rab">RAB</a>
+                                <a className="dropdown-item" href="/proyek/scheduling">Scheduling</a>
                             </div>
                         </li>
 
                         <li className="nav-item">
-                            <a className="nav-link" href="/">Pelaporan <span className="sr-only">(current)</span></a>
+                            <a className="nav-link" href="/pelaporan">Pelaporan</a>
                         </li>
 
                         <li className="nav-item dropdown">
@@ -43,8 +43,8 @@ const Navbar = () => {
                                 Laporan
                          </a>
                             <div className="dropdown-menu" aria-labelledby="navbarDropdown">
-                                <a className="dropdown-item" href="#">Sumber Daya</a>
-                                <a className="dropdown-item" href="#">Sumber Daya Proyek</a>
+                                <a className="dropdown-item" href="/laporan/sumberdaya">Sumber Daya</a>
+                                <a className="dropdown-item" href="/laporan/proyek">Sumber Daya Proyek</a>
                             </div>
                         </li>
 

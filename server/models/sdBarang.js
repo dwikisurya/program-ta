@@ -4,15 +4,12 @@ const Schema = mongoose.Schema
 const userSchema = new Schema({
     namaBarang: {
         type: String,
-        required: true
     },
     satuanBarang: {
         type: String,
-        required: true
     },
     updated_at: {
         type: Date,
-        required: true
     },
 })
 

@@ -9,6 +9,7 @@ module.exports = class RABController {
     static tambah(req, res) {
         const idproyek = req.body.idProyek
         const rabdarirequst = req.body.rab
+        const grand = req.body.grandTotal
         const updated_at = Date.now()
         const status = "Created"
 
@@ -16,7 +17,8 @@ module.exports = class RABController {
             idProyek: idproyek,
             rab: rabdarirequst,
             updated_at: updated_at,
-            status: status
+            status: status,
+            grandTotal: grand
         }).then((result) => {
             res.status(201).json({ msg: 'Data Berhasil Ditambah' })
             console.log(result)
@@ -34,7 +36,7 @@ module.exports = class RABController {
                 select: 'namaProyek'
             }).populate({
                 path: 'rab.idKegiatanProyek',
-                select: 'namaKegiatan'
+                select: 'namaKegiatan-_id'
             })
             .then((result) => {
                 res.status(200).json(result)
@@ -67,7 +69,7 @@ module.exports = class RABController {
                 select: 'namaProyek'
             }).populate({
                 path: 'idKegiatanProyek',
-                select: 'namaKegiatan'
+                select: 'namaKegiatan -_id'
             })
             .then((result) => {
                 res.status(200).json(result)

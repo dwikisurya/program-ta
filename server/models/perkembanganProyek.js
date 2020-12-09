@@ -18,9 +18,10 @@ const perkembanganSchema = new Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'sdManusia'
     }],
-    posted_at: Date,
+    created_at: Date,
     updated_at: Date
 })
 
 const perkembangan = mongoose.model('perkembangan', perkembanganSchema)
 module.exports = perkembangan
+

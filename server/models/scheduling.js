@@ -13,6 +13,9 @@ const schedulingSchema = new Schema({
         tglKerja: {
             type: Date
         },
+        uraianPekerjaan: [{
+            type: String
+        }],
         bobotPekerjaan: {
             type: Number
         },
@@ -20,6 +23,8 @@ const schedulingSchema = new Schema({
             type: Number
         },
     }],
+    created_at: Date,
+    updated_at: Date
 })
 
 const scheduling = mongoose.model('scheduling', schedulingSchema)

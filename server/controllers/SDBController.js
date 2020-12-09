@@ -38,12 +38,11 @@ module.exports = class SDBController {
     // Note: waktu buat halaman untuk update, sertakan data yang ada di kolomnya
     static update(req, res) {
         const id = req.params.id
-        const updated_at = Date.now()
 
         const dataupdate = {
             namaBarang: req.body.namaBarang,
             satuanBarang: req.body.satuanBarang,
-            updated_at: updated_at
+
         }
 
         sdBarang.findByIdAndUpdate(id, dataupdate, { new: true }, function (err, docs) {
@@ -52,8 +51,8 @@ module.exports = class SDBController {
                 res.status(500).send(err);
             }
             else {
-                res(docs)
                 res.status(200).send(docs)
+                console.log(docs)
             }
         })
     }

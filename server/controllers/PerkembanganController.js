@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken')
 module.exports = class PerkembanganController {
 
     static tambah(req, res) {
-        const idScheduling = req.body.idScheduling
+        const idScheduling = req.body.idSchedulingProyek
         const uraian = req.body.uraian
         const persentase = req.body.persentase
         const idSDB = req.body.idSDB
@@ -14,7 +14,7 @@ module.exports = class PerkembanganController {
         const created_at = Date.now()
 
         perkembangan.create({
-            idScheduling: idScheduling,
+            idSchedulingProyek: idScheduling,
             uraian: uraian,
             persentase: persentase,
             idSDB: idSDB,

@@ -8,13 +8,15 @@ module.exports = class SchedulingController {
 
         const idRabProyek = req.body.idRabProyek
         const schedarirequst = req.body.sch
+        const created_at = Date.now()
 
         scheduling.create({
             idRabProyek: idRabProyek,
-            sch: schedarirequst
+            sch: schedarirequst,
+            created_at: created_at
         }).then((result) => {
             res.status(201).json({ msg: 'Data Berhasil Ditambah' })
-            console.log(sche)
+            console.log(result)
         }).catch((err) => {
             res.status(500).json(err)
         })
@@ -25,7 +27,7 @@ module.exports = class SchedulingController {
             .populate({
                 path: 'idRabProyek',
                 model: 'rabproyek',
-                select: 'namaProyek -_id',
+                select: 'namaProyek id',
                 populate: {
                     path: 'idProyek',
                     model: 'proyek',

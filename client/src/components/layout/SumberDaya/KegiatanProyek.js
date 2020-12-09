@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react'
 import Navbar from '../Navbar'
 
 import ModalKegiatanProyek from './ModalKegiatanProyek'
+import _ from 'lodash'
+import dateFormat from 'dateformat'
+import MaterialTable from "material-table"
 
 import hitkegiatan from '../../client/sumberdaya/kegiatanproyek.get'
 import postkegiatan from '../../client/sumberdaya/kegiatanproyek.post'
@@ -12,6 +15,17 @@ const KegiatanProyek = () => {
     // State Get
     const [kegiatanProyek, setkegiatanData] = useState([])
 
+    var dataqq = _.map(kegiatanProyek, function (group) {
+        return {
+            id: group._id,
+            namaKegiatan: group.namaKegiatan,
+            deskripsiKegiatan: group.deskripsiKegiatan,
+            satuanKegiatan: group.satuanKegiatan,
+            hargaSatuan: group.hargaSatuan,
+            updated_at: dateFormat(group.updated_at, "dd mmmm yyyy")
+        }
+    });
+    console.log({ kegiatanProyek, dataqq })
     const getData = async () => {
         const kegiatan = await hitkegiatan()
         if (kegiatan.status === 200) {
@@ -25,23 +39,6 @@ const KegiatanProyek = () => {
         getData()
     }, [])
 
-    const rendertable = () => {
-        return kegiatanProyek.map(kegiatan => {
-            return (
-                <tr key={kegiatan._id}>
-                    <td>{kegiatan.namaKegiatan}</td>
-                    <td>{kegiatan.deskripsiKegiatan}</td>
-                    <td>{kegiatan.satuanKegiatan}</td>
-                    <td>{kegiatan.hargaSatuan}</td>
-                    <td><ModalKegiatanProyek datakegiatan={kegiatan} /></td>
-                    <td>
-                        <button className="btn-sm btn-danger" type="button" data-toggle="tooltip" data-placement="top" title="Delete"
-                            onClick={(e) => deleteRow(kegiatan._id, e)}>Delete</button>
-                    </td>
-                </tr>
-            )
-        })
-    }
 
     // State Post
     const [formdata, setformData] = useState({})
@@ -54,11 +51,11 @@ const KegiatanProyek = () => {
         e.preventDefault()
         if (formdata !== null) {
             console.log('Success')
-            console.log(formdata)
             postkegiatan(formdata)
-            window.location = "/"
+            alert("Success tambah data")
+            window.location = "/sumberdaya/kegiatan"
         } else {
-            console.log('Error')
+            alert("Harap isi field yang kosong")
         }
     }
 
@@ -82,38 +79,57 @@ const KegiatanProyek = () => {
                         <div className="form-group">
                             <h5>Input Data Kegiatan Proyek</h5>
                             <label for="inp_namakegiatanproyek">Nama Kegiatan</label>
-                            <input type="text" className="form-control" name="namaKegiatan" onInput={handlerChange.bind(this)} />
+                            <input type="text" className="form-control" name="namaKegiatan" onInput={handlerChange.bind(this)} required />
                         </div>
                         <div className="form-group">
                             <label for="inp_deksripsikegiatanproyek">Deskripsi Kegiatan</label>
-                            <input type="text" className="form-control" name="deskripsiKegiatan" onInput={handlerChange.bind(this)} />
+                            <input type="text" className="form-control" name="deskripsiKegiatan" onInput={handlerChange.bind(this)} required />
                         </div>
                         <div className="form-group">
                             <label for="inp_satuankegiatanproyek">Satuan Kegiatan</label>
-                            <input type="text" className="form-control" name="satuanKegiatan" onInput={handlerChange.bind(this)} />
+                            <input type="text" className="form-control" name="satuanKegiatan" onInput={handlerChange.bind(this)} required />
                         </div>
                         <div className="form-group">
                             <label for="inp_hargasatuankegiatanproyek">Harga Satuan</label>
-                            <input type="number" className="form-control" name="hargaSatuan" onInput={handlerChange.bind(this)} />
+                            <input type="number" className="form-control" name="hargaSatuan" onInput={handlerChange.bind(this)} required />
                         </div>
                         <button type="submit" className="btn btn-primary">Submit</button>
                     </form>
+
                 </div>
 
                 <div className="col-md-6">
-                    <table className="table table-responsive-md" id="kegiatanProyek">
-                        <thead>
-                            <tr>
-                                <th>Nama Kegiatan</th>
-                                <th>Deskripsi Kegiatan</th>
-                                <th>Satuan Kegiatan</th>
-                                <th>Harga Satuan</th>
-                                <th></th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>{rendertable()}</tbody>
-                    </table>
+                    <h5>Data Kegiatan Proyek</h5>
+                    <MaterialTable
+                        title="Data Kegiatan Proyek"
+                        columns={[
+                            { title: "ID", field: "id", hidden: true },
+                            { title: "Nama Kegiatan", field: "namaKegiatan" },
+                            { title: "Deskripsi Kegiatan", field: 'deskripsiKegiatan' },
+                            { title: "Satuan Kegiatan", field: 'satuanKegiatan' },
+                            { title: "Harga Satuan", field: 'hargaSatuan' },
+                            {
+                                title: "Edit",
+                                field: "internal_action",
+                                editable: false,
+                                render: (rowData) =>
+                                    rowData && (
+                                        <td><ModalKegiatanProyek rowData={rowData} /></td>
+                                    )
+                            },
+                        ]}
+                        data={(dataqq)}
+                        actions={[
+                            {
+                                icon: 'delete',
+                                tooltip: 'Delete Data',
+                                onClick: (e, rowData) => deleteRow(rowData._id, e)
+                            }
+                        ]}
+                        options={{
+                            actionsColumnIndex: -1
+                        }}
+                    />
                 </div>
             </div>
         </div>

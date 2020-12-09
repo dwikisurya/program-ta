@@ -59,6 +59,7 @@ module.exports = class SDMController {
             }
             else {
                 res.status(200).send(docs)
+                console.log(docs)
             }
         })
     }

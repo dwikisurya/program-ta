@@ -1,13 +1,19 @@
 import React, { Children, useEffect, useState } from 'react'
 import Navbar from '../Navbar'
 
+import MaterialTable from "material-table";
+import _ from 'lodash'
+import dateFormat from 'dateformat'
+
 import hitproyek from '../../client/proyek/proyek.get'
 import postproyek from '../../client/proyek/proyek.post'
 import deleteproyek from '../../client/proyek/proyek.delete'
 import ModalProyek from './ModalProyek'
 
+
 import hitkategori from '../../client/sumberdaya/kategoriproyek.get'
 import hitsdm from '../../client/sumberdaya/sdmanusia.get'
+
 
 const Proyek = () => {
 
@@ -23,25 +29,22 @@ const Proyek = () => {
         }
     }
 
-    const rendertable = () => {
-        return proyek.map((proyek, index) => {
-            return (
-                <tr key={proyek._id}>
-                    <td>{proyek.namaProyek}</td>
-                    <td>{proyek.clientProyek}</td>
-                    <td>{proyek.lokasiProyek}</td>
-                    <td>{proyek.statusProyek}</td>
-                    <td>{proyek.projectManager.namaKaryawan}</td>
-                    <td>{proyek.kategoriProyek.namaKategori}</td>
-                    <td><ModalProyek dataproyek={proyek} /></td>
-                    <td>
-                        <button className="btn-sm btn-danger" type="button" data-toggle="tooltip" data-placement="top" title="Delete"
-                            onClick={(e) => deleteRow(proyek._id, e)}>Delete</button>
-                    </td>
-                </tr>
-            )
-        })
-    }
+    var dataqq = _.map(proyek, function (group) {
+        return {
+            id: group._id,
+            namaProyek: group.namaProyek,
+            clientProyek: group.clientProyek,
+            statusProyek: group.statusProyek,
+            lokasiProyek: group.lokasiProyek,
+            kategoriProyek: group.kategoriProyek.namaKategori,
+            projectManager: group.projectManager.namaKaryawan,
+            created_at: dateFormat(group.created_at, "dd mmmm yyyy"),
+            updated_at: dateFormat(group.updated_at, "dd mmmm yyyy"),
+            accepted_at: dateFormat(group.accepted_at, "dd mmmm yyyy")
+        }
+    });
+
+
 
     // Get For Kategori
     const [datakategori, setDataKategori] = useState([])
@@ -122,53 +125,79 @@ const Proyek = () => {
                     <form onSubmit={handlerSubmit}>
                         <div className="form-group">
                             <h5>Input Data Proyek</h5>
-                            <label for="inp_namaproyek">Nama Proyek</label>
+                            <label htmlFor="inp_namaproyek">Nama Proyek</label>
                             <input type="text" className="form-control" name="namaProyek" onInput={handlerChange.bind(this)} />
                         </div>
                         <div className="form-group">
-                            <label for="inp_idpekerjaanrab">Kategori Proyek</label>
+                            <label htmlFor="inp_idpekerjaanrab">Kategori Proyek</label>
                             <select className="form-control" name="kategoriProyek" onInput={handlerChange.bind(this)}>
                                 <option>     </option>
                                 {renderKategori()}
                             </select>
                         </div>
                         <div className="form-group">
-                            <label for="inp_idpekerjaanrab">Project Manager</label>
+                            <label htmlFor="inp_idpekerjaanrab">Project Manager</label>
                             <select className="form-control" name="projectManager" onInput={handlerChange.bind(this)}>
                                 <option>     </option>
                                 {renderPM()}
                             </select>
                         </div>
                         <div className="form-group">
-                            <label for="inp_clientproyek">Client</label>
+                            <label htmlFor="inp_clientproyek">Client</label>
                             <input type="text" className="form-control" name="clientProyek" onInput={handlerChange.bind(this)} />
                         </div>
                         <div className="form-group">
-                            <label for="inp_lokasiproyek">Lokasi</label>
+                            <label htmlFor="inp_lokasiproyek">Lokasi</label>
                             <input type="text" className="form-control" name="lokasiProyek" onInput={handlerChange.bind(this)} />
                         </div>
                         <div className="form-group">
-                            <label for="inp_lokasiproyek">Status Proyek</label>
+                            <label htmlFor="inp_lokasiproyek">Status Proyek</label>
                             <input type="text" className="form-control" name="statusProyek" onInput={handlerChange.bind(this)} />
                         </div>
                         <button type="submit" className="btn btn-primary">Submit</button>
+
+
                     </form>
                 </div>
 
                 <div className="col-md-8">
-                    <table className="table table-responsive-md" id="Proyek">
-                        <thead>
-                            <tr>
-                                <th>Nama Proyek</th>
-                                <th>Client Proyek</th>
-                                <th>Lokasi</th>
-                                <th>Status</th>
-                                <th>Project Manager</th>
-                                <th>Kategori Proyek</th>
-                            </tr>
-                        </thead>
-                        <tbody>{rendertable()}</tbody>
-                    </table>
+                    <MaterialTable
+                        title="Data RAB"
+                        columns={[
+                            { title: "ID", field: "id", hidden: true },
+                            { title: "Nama Proyek", field: "namaProyek" },
+                            { title: "Kategori Proyek", field: "kategoriProyek", defaultGroupOrder: 0 },
+                            { title: "Client", field: "clientProyek", defaultGroupOrder: 1 },
+                            { title: "Lokasi", field: "lokasiProyek", defaultGroupOrder: 2 },
+                            { title: "Status", field: "statusProyek" },
+                            { title: "Project Manager", field: "projectManager" },
+                            { title: "Created At", field: "created_at" },
+                            { title: "Updated At", field: "updated_at" },
+                            {
+                                title: "Edit",
+                                field: "internal_action",
+                                editable: false,
+                                render: (rowData) =>
+                                    rowData && (
+                                        <td><ModalProyek rowData={rowData} /></td>
+                                    )
+                            },
+                        ]}
+                        data={(dataqq)}
+                        options={{
+                            grouping: true
+                        }}
+                        actions={[
+                            {
+                                icon: 'delete',
+                                tooltip: 'Delete Data',
+                                onClick: (e, rowData) => deleteRow(rowData.id, e)
+                            }
+                        ]}
+                        options={{
+                            actionsColumnIndex: -1
+                        }}
+                    />
                 </div>
             </div>
         </div >

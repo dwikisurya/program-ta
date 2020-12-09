@@ -22,6 +22,7 @@ const rabSchema = new Schema({
         totalHarga: Number,
     }],
     status: String,
+    grandTotal: Number,
     accepted_at: Date,
     updated_at: Date
 })

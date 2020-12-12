@@ -16,7 +16,7 @@ const ModalSDB = ({ rowData }) => {
                 console.log(sdbdata)
                 putsdb(sdbdata)
                 alert("Data berhasil di update")
-                // window.location = "/sumberdaya/barang";
+                window.location = "/sumberdaya/barang"
             } else {
                 alert("Gagal update data")
             }

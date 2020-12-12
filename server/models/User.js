@@ -7,15 +7,17 @@ const userSchema = new Schema({
         type: String,
         required: true,
         unique: true
-
     },
     password: {
         type: String,
         required: true,
         minlength: 6
     },
-    fullName: String,
-    isWoman: Boolean,
+    role: {
+        // Hanya menerima : administrasi, pm, mandor, direktur
+        type: String,
+        required: true
+    },
 })
 
 userSchema.pre('save', async function (next) {

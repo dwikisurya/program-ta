@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import Navbar from '../Navbar'
 
 import ModalSDB from './ModalSDB'
-import MaterialTable from "material-table";
+import MaterialTable from "material-table"
 
 import hitsdb from '../../client/sumberdaya/sdbarang.get'
 import postsdb from '../../client/sumberdaya/sdbarang.post'
@@ -18,16 +18,15 @@ const SDB = () => {
         setformData(formdata => ({ ...formdata, [e.target.name]: e.target.value }));
     }
 
-
     const handlerSubmit = (e) => {
         e.preventDefault()
-        if (formdata.namaBarang == null && formdata.satuan == null) {
-            console.log('Error')
+        const a = (Object.keys(formdata).length)
+        if (a < 2) {
             alert("Harap isi field yang kosong")
         } else {
             console.log('Success')
             postsdb(formdata)
-            alert("Success tambah data")
+            alert("Data berhasil ditambah!")
             window.location = "/sumberdaya/barang"
         }
     }
@@ -58,23 +57,22 @@ const SDB = () => {
         getData()
     }, [])
 
-    //    <td><ModalSDB datasdb={datasdb} /> </td>
 
     return (
         <div className="container-fluid">
             <Navbar />
-            <div className="row">
+            <div className="row" style={{ margin: 10 }}>
                 <div className="col-md-6">
                     <form onSubmit={handlerSubmit}>
                         <div className="form-group">
                             <h5>Input Data SDB</h5>
                             <label htmlFor="namaBarang">Nama Barang</label>
-                            <input type="text" className="form-control" name="namaBarang" onInput={handlerChange.bind(this)} required />
+                            <input type="text" className="form-control" name="namaBarang" onInput={handlerChange.bind(this)} />
 
                         </div>
                         <div className="form-group">
                             <label htmlFor="satuan">Satuan</label>
-                            <input type="text" className="form-control" name="satuan" onInput={handlerChange.bind(this)} required />
+                            <input type="text" className="form-control" name="satuan" onInput={handlerChange.bind(this)} />
 
                         </div>
                         <button type="submit" value="Add" className="btn btn-primary">Submit</button>

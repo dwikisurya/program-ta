@@ -15,7 +15,7 @@ const ModalKegiatanProyek = ({ rowData }) => {
             if (kegiatanProyek !== null) {
                 console.log(kegiatanProyek)
                 putkegiatan(kegiatanProyek)
-                // console.log("Data Berhasil di update")
+                alert("Data Berhasil di update")
                 // window.location = "/";
             } else {
                 console.log("Data Gagal di update")
@@ -42,7 +42,7 @@ const ModalKegiatanProyek = ({ rowData }) => {
                 <div className="modal-dialog">
                     <div className="modal-content">
                         <div className="modal-header">
-                            <h4 className="modal-title">Edit Kategori Proyek</h4>
+                            <h4 className="modal-title">Edit Kegiatan Proyek</h4>
 
                             <button
                                 type="button"

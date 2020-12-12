@@ -4,6 +4,7 @@ import dateFormat from 'dateformat'
 import _ from 'lodash'
 import MaterialTable from "material-table"
 
+import putrabstatus from '../../client/proyek/rab.status.put'
 import hitscheduling from '../../client/proyek/scheduling.get'
 import postscheduling from '../../client/proyek/scheduling.post'
 import deletescheduling from '../../client/proyek/scheduling.delete'
@@ -58,46 +59,12 @@ const Scheduling = () => {
             namaProyek: group.namaProyek,
             uraian: group.uraian,
             tglKerja: dateFormat(group.tglKerja, "dd mmmm yyyy"),
-            bobotKegiatan: group.bobotKegiatan.toFixed(2),
-            bobotPekerjaan: group.bobotPekerjaan.toFixed(2),
-            perkiraanDurasi: group.perkiraanDurasi.toFixed(0),
+            bobotKegiatan: group.bobotKegiatan,
+            bobotPekerjaan: group.bobotPekerjaan,
+            perkiraanDurasi: group.perkiraanDurasi,
             created_at: dateFormat(group.created_at, "dd mmmm yyyy")
         }
     });
-
-    const rendertable = () => {
-        return scheduling.map(sch => {
-            return (
-                <tr key={sch._id}>
-                    <td>{sch.idRabProyek.idProyek.namaProyek}</td>
-                    <td>{rab.map(rabq => {
-                        if (rabq._id === sch.idRabProyek._id) {
-                            return (
-                                <tr><th>Uraian Pekerjaan</th>
-                                    <td>{rabq.rab.map(q1 => {
-                                        return (<tr><td>{q1.uraianPekerjaan}</td>
-                                        </tr>
-                                        )
-                                    })}
-                                    </td>
-                                    <td>{sch.sch.map(q2 => {
-                                        return (<tr><td>{q2.perkiraanDurasi + " Hari"}</td></tr>)
-                                    })}</td>
-                                    <td>{sch.sch.map(schq => {
-                                        let today = dateFormat(schq.tglKerja, "dd mmmm yyyy")
-                                        return (<tr><td>{today}</td></tr>)
-                                    })}</td>
-
-                                </tr>
-                            )
-                        }
-                    })}</td>
-                    <td>   <button className="btn-sm btn-danger" type="button" data-toggle="tooltip" data-placement="top" title="Delete"
-                        onClick={(e) => deleteRow(sch._id, e)}>Delete</button></td>
-                </tr>
-            )
-        })
-    }
 
     // Populate Dropdwon Id RAB Proyek untuk form
     const renderRAB = () => {
@@ -144,7 +111,6 @@ const Scheduling = () => {
         j = values[index].bobotKegiatan
         values[index].bobotPekerjaan = (j / i)
 
-
         setFormData(values)
     }
 
@@ -174,33 +140,41 @@ const Scheduling = () => {
         })
     }
 
+    const [statusRAB, setStatusRAB] = useState({ status: 'On-Going' })
+
     const handleSubmit = e => {
         e.preventDefault();
 
-        var groups1 = _.groupBy(rab, function (value) {
+        var groups1 = _.groupBy(scheduling, function (value) {
             return value.idRabProyek;
         });
 
-        console.log(groups1)
-
         var data = _.map(groups1, function (group) {
             return {
-                namaProyek: group[0].idRabProyek.idProyek.namaProyek,
-                count: _.countBy(group, 'idRabProyek.idProyek.namaProyek')
+                count: _.countBy(group, 'idRabProyek._id')
             }
         });
 
 
-        console.log(data)
+        const idRAB = formRAB.idRabProyek
+        let c = 0
 
-        // if (formdata !== null && formRAB !== null) {
-        //     console.log('Success')
-        //     const idRAB = formRAB.idRabProyek
-        //     postscheduling(formdata, idRAB)
-        //     window.location = "/"
-        // } else {
-        //     console.log('Error')
-        // }
+        data.map(d1 => {
+            return c = d1.count[idRAB]
+        })
+
+        console.log({ data, idRAB, c })
+
+        if (c < 1 || c === undefined) {
+            alert('Berhasil menambah data scheduling')
+            const idRAB = formRAB.idRabProyek
+            postscheduling(formdata, idRAB)
+            putrabstatus(idRAB, statusRAB)
+            window.location = "/proyek/scheduling"
+        } else {
+
+            alert(`Gagal menambah data scheduling:` + formRAB.idRabProyek + ` karena data sudah ada`)
+        }
     };
 
     // Delete
@@ -209,7 +183,7 @@ const Scheduling = () => {
             .then(res => {
                 const schdulingq = scheduling.filter(_id => scheduling._id !== id);
                 setScheduling(schdulingq)
-                console.log('Data telah dihapus')
+                alert('Data telah dihapus')
                 getData()
             })
     }
@@ -224,7 +198,7 @@ const Scheduling = () => {
         <div>
             <Navbar />
             <div className="container-fluid">
-                <div className="row clearfix">
+                <div className="row clearfix" style={{ margin: 10 }}>
                     <div className="col-md-5">
                         <h5>Input Scheduling</h5>
                         <form onSubmit={handleSubmit}>
@@ -295,15 +269,6 @@ const Scheduling = () => {
 
 
                     <div className="col-md-7">
-                        <table className="table table-responsive-md" id="Proyek">
-                            <thead>
-                                <tr>
-                                    <th className="text-center">Nama Proyek</th>
-                                    <th className="text-center">Uraian / Durasi</th>
-                                </tr>
-                            </thead>
-                            <tbody>{rendertable()}</tbody>
-                        </table>
                         <MaterialTable
                             title="Data RAB"
                             columns={[
@@ -318,13 +283,6 @@ const Scheduling = () => {
                             options={{
                                 grouping: true
                             }}
-                            actions={[
-                                {
-                                    icon: 'delete',
-                                    tooltip: 'Delete Data',
-                                    onClick: (e, rowData) => deleteRow(rowData.id, e)
-                                }
-                            ]}
                             actions={[
                                 {
                                     icon: 'delete',

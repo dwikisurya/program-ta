@@ -14,5 +14,6 @@ rabRouter.get('/', RABController.read)
 rabRouter.get('/:id', RABController.readOne)
 rabRouter.delete('/:id', RABController.delete)
 rabRouter.put('/:id', RABController.put)
+rabRouter.put('/status/:id', RABController.updateStatus)
 
 module.exports = rabRouter

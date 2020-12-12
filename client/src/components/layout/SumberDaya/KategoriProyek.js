@@ -34,13 +34,14 @@ const KategoriProyek = () => {
 
     const handlerSubmit = (e) => {
         e.preventDefault()
-        if (formdata !== null) {
+        const a = (Object.keys(formdata).length)
+        if (a < 2) {
+            alert("Harap isi field yang kosong")
+        } else {
             console.log('Success')
             postkategori(formdata)
             alert("Success tambah data")
-            window.location = "/"
-        } else {
-            alert("Harap isi field yang kosong")
+            window.location = "/sumberdaya/kategori"
         }
     }
 
@@ -50,7 +51,7 @@ const KategoriProyek = () => {
             .then(res => {
                 const statekategori = kategoriProyek.filter(_id => kategoriProyek._id !== id);
                 setkategoriData(statekategori)
-                console.log('Data telah dihapus')
+                alert(`Data id:` + id + `telah dihapus`)
                 getData()
             })
     }
@@ -58,17 +59,17 @@ const KategoriProyek = () => {
     return (
         <div className="container-fluid">
             <Navbar />
-            <div className="row">
+            <div className="row" style={{ margin: 10 }}>
                 <div className="col-md-6">
                     <form onSubmit={handlerSubmit}>
                         <div className="form-group">
                             <h5>Input Data Kategori Proyek</h5>
                             <label for="inp_kategoriproyek">Kategori Proyek</label>
-                            <input type="text" className="form-control" name="namaKategori" onInput={handlerChange.bind(this)} required />
+                            <input type="text" className="form-control" name="namaKategori" onInput={handlerChange.bind(this)} />
                         </div>
                         <div className="form-group">
                             <label for="inp_deskripsikategori">Deskripsi Kategori</label>
-                            <input type="text" className="form-control" name="deskripsiKategori" onInput={handlerChange.bind(this)} required />
+                            <input type="text" className="form-control" name="deskripsiKategori" onInput={handlerChange.bind(this)} />
                         </div>
                         <button type="submit" className="btn btn-primary">Submit</button>
                     </form>
@@ -76,7 +77,7 @@ const KategoriProyek = () => {
 
                 <div className="col-md-6">
                     <MaterialTable
-                        title="Data Kegiatan Proyek"
+                        title="Data Kategori Proyek"
                         columns={[
                             { title: "ID", field: "_id", hidden: true },
                             { title: "Nama Kegiatan", field: "namaKategori" },

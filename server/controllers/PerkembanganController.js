@@ -33,12 +33,27 @@ module.exports = class PerkembanganController {
     static read(req, res) {
         perkembangan.find()
             .populate({
+                path: 'idSchedulingProyek',
+                model: 'scheduling',
+                select: 'id',
+                populate: {
+                    path: 'idRabProyek',
+                    model: 'rabproyek',
+                    select: 'id',
+                    populate: {
+                        path: 'idProyek',
+                        model: 'proyek',
+                        select: 'namaProyek -_id'
+                    }
+                }
+            })
+            .populate({
                 path: 'idSDB',
-                select: 'namaBarang'
+                select: 'namaBarang-_id'
             })
             .populate({
                 path: 'idSDM',
-                select: 'namaKaryawan'
+                select: 'namaKaryawan-_id'
             })
             .then((result) => {
                 res.status(200).json(result)

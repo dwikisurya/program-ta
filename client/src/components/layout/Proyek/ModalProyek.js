@@ -18,9 +18,10 @@ const ModalProyek = ({ rowData }) => {
         e.preventDefault();
         try {
             if (proyekData !== null) {
+                console.log(proyekData)
                 putproyek(proyekData)
-                // console.log("Data Berhasil di update")
-                window.location = "/"
+                alert("Data Berhasil di update")
+                window.location = "/proyek"
             } else {
                 console.log("Data Gagal di update")
             }
@@ -57,6 +58,7 @@ const ModalProyek = ({ rowData }) => {
             console.log(pm)
         }
     }
+
     const renderPM = () => {
         return projectmanager.map(pm => {
             return (
@@ -116,12 +118,14 @@ const ModalProyek = ({ rowData }) => {
                             <tr>
                                 <td><label for="inp_idpekerjaanrab">Kategori Proyek</label></td>
                                 <td><select v-model="kategoriProyek" name="kategoriProyek" onInput={handlerChange.bind(this)}>
+                                    <option></option>
                                     {renderKategori()}
                                 </select></td>
                             </tr>
                             <tr>
                                 <td><label for="inp_idpekerjaanrab">Project Manager</label></td>
                                 <td><select v-model="projectManager" name="projectManager" onInput={handlerChange.bind(this)}>
+                                    <option></option>
                                     {renderPM()}
                                 </select></td>
                             </tr>
@@ -173,7 +177,7 @@ const ModalProyek = ({ rowData }) => {
                                 type="button"
                                 className="btn btn-danger"
                                 data-dismiss="modal"
-                                onClick={() => setProyekData(proyekData)}
+                                onClick={() => setProyekData(rowData)}
                             >
                                 Close
               </button>

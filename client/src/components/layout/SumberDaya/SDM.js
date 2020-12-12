@@ -50,13 +50,14 @@ const SDM = () => {
 
     const handlerSubmit = (e) => {
         e.preventDefault()
-        if (formdata !== null) {
+        const a = (Object.keys(formdata).length)
+        if (a < 5) {
+            alert("Harap isi field yang kosong")
+        } else {
             console.log('Succes')
             postsdm(formdata)
             alert("Success tambah data")
             window.location = "/sumberdaya/manusia"
-        } else {
-            alert("Harap isi field yang kosong")
         }
     }
 
@@ -66,39 +67,37 @@ const SDM = () => {
             .then(res => {
                 const statesdm = sdmData.filter(_id => sdmData._id !== id);
                 setsdmData(statesdm)
-                console.log('Data telah dihapus')
+                alert(`Data dengan id:` + id + `sudah dihapus`)
                 getData()
             })
     }
 
-
-
     return (
         <div className="container-fluid">
             <Navbar />
-            <div className="row">
+            <div className="row" style={{ margin: 10 }}>
                 <div className="col-md-6">
                     <form onSubmit={handlerSubmit}>
                         <div className="form-group">
                             <h5>Input Data SDM</h5>
                             <label for="inp_namakaryawan">Nama Karyawan</label>
-                            <input type="text" className="form-control" name="namaKaryawan" onInput={handlerChange.bind(this)} required />
+                            <input type="text" className="form-control" name="namaKaryawan" onInput={handlerChange.bind(this)} />
                         </div>
                         <div className="form-group">
                             <label for="inp_tgllahir">Tanggal Lahir</label>
-                            <input type="date" className="form-control" name="tgl_lahir" onInput={handlerChange.bind(this)} required />
+                            <input type="date" className="form-control" name="tgl_lahir" onInput={handlerChange.bind(this)} />
                         </div>
                         <div className="form-group">
                             <label for="inp_jk">Jenis Kelamin</label>
-                            <input type="text" className="form-control" name="jk" onInput={handlerChange.bind(this)} required />
+                            <input type="text" className="form-control" name="jk" onInput={handlerChange.bind(this)} />
                         </div>
                         <div className="form-group">
                             <label for="inp_alamat">Alamat</label>
-                            <input type="text" className="form-control" name="alamat" onInput={handlerChange.bind(this)} required />
+                            <input type="text" className="form-control" name="alamat" onInput={handlerChange.bind(this)} />
                         </div>
                         <div className="form-group">
                             <label for="inp_notelp">No.Telepon</label>
-                            <input type="text" className="form-control" name="no_telp" onInput={handlerChange.bind(this)} required />
+                            <input type="text" className="form-control" name="no_telp" onInput={handlerChange.bind(this)} />
                         </div>
                         <button type="submit" className="btn btn-primary">Submit</button>
                     </form>
@@ -129,7 +128,7 @@ const SDM = () => {
                             {
                                 icon: 'delete',
                                 tooltip: 'Delete Data',
-                                onClick: (e, rowData) => deleteRow(rowData._id, e)
+                                onClick: (e, rowData) => deleteRow(rowData.id, e)
                             },
 
                         ]}

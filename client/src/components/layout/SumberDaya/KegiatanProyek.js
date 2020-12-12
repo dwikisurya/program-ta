@@ -25,7 +25,6 @@ const KegiatanProyek = () => {
             updated_at: dateFormat(group.updated_at, "dd mmmm yyyy")
         }
     });
-    console.log({ kegiatanProyek, dataqq })
     const getData = async () => {
         const kegiatan = await hitkegiatan()
         if (kegiatan.status === 200) {
@@ -49,13 +48,15 @@ const KegiatanProyek = () => {
 
     const handlerSubmit = (e) => {
         e.preventDefault()
-        if (formdata !== null) {
+        const a = (Object.keys(formdata).length)
+        if (a < 4) {
+            alert("Harap isi field yang kosong")
+
+        } else {
             console.log('Success')
             postkegiatan(formdata)
             alert("Success tambah data")
             window.location = "/sumberdaya/kegiatan"
-        } else {
-            alert("Harap isi field yang kosong")
         }
     }
 
@@ -63,9 +64,9 @@ const KegiatanProyek = () => {
     const deleteRow = (id, e) => {
         deletekegiatan(id)
             .then(res => {
+                alert(`Data dengan id:` + id + `telah dihapus`)
                 const statekegiatan = kegiatanProyek.filter(_id => kegiatanProyek._id !== id);
                 setkegiatanData(statekegiatan)
-                console.log('Data telah dihapus')
                 getData()
             })
     }
@@ -73,25 +74,25 @@ const KegiatanProyek = () => {
     return (
         <div className="container-fluid">
             <Navbar />
-            <div className="row">
+            <div className="row" style={{ margin: 10 }}>
                 <div className="col-md-6">
                     <form onSubmit={handlerSubmit}>
                         <div className="form-group">
                             <h5>Input Data Kegiatan Proyek</h5>
                             <label for="inp_namakegiatanproyek">Nama Kegiatan</label>
-                            <input type="text" className="form-control" name="namaKegiatan" onInput={handlerChange.bind(this)} required />
+                            <input type="text" className="form-control" name="namaKegiatan" onInput={handlerChange.bind(this)} />
                         </div>
                         <div className="form-group">
                             <label for="inp_deksripsikegiatanproyek">Deskripsi Kegiatan</label>
-                            <input type="text" className="form-control" name="deskripsiKegiatan" onInput={handlerChange.bind(this)} required />
+                            <input type="text" className="form-control" name="deskripsiKegiatan" onInput={handlerChange.bind(this)} />
                         </div>
                         <div className="form-group">
                             <label for="inp_satuankegiatanproyek">Satuan Kegiatan</label>
-                            <input type="text" className="form-control" name="satuanKegiatan" onInput={handlerChange.bind(this)} required />
+                            <input type="text" className="form-control" name="satuanKegiatan" onInput={handlerChange.bind(this)} />
                         </div>
                         <div className="form-group">
                             <label for="inp_hargasatuankegiatanproyek">Harga Satuan</label>
-                            <input type="number" className="form-control" name="hargaSatuan" onInput={handlerChange.bind(this)} required />
+                            <input type="number" className="form-control" name="hargaSatuan" onInput={handlerChange.bind(this)} />
                         </div>
                         <button type="submit" className="btn btn-primary">Submit</button>
                     </form>
@@ -99,7 +100,7 @@ const KegiatanProyek = () => {
                 </div>
 
                 <div className="col-md-6">
-                    <h5>Data Kegiatan Proyek</h5>
+
                     <MaterialTable
                         title="Data Kegiatan Proyek"
                         columns={[
@@ -123,7 +124,7 @@ const KegiatanProyek = () => {
                             {
                                 icon: 'delete',
                                 tooltip: 'Delete Data',
-                                onClick: (e, rowData) => deleteRow(rowData._id, e)
+                                onClick: (e, rowData) => deleteRow(rowData.id, e)
                             }
                         ]}
                         options={{

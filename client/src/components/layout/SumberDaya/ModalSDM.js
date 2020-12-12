@@ -15,10 +15,10 @@ const ModalSDM = ({ rowData }) => {
             if (sdmdata !== null) {
                 console.log(sdmdata)
                 putsdm(sdmdata)
-                console.log("Data Berhasil di update")
-                window.location = "/sumberdaya/manusia"
+                alert("Data Berhasil di update")
+                // window.location = "/sumberdaya/manusia"
             } else {
-                console.log("Data Gagal di update")
+                alert("Data Gagal di update")
             }
 
         } catch (err) {
@@ -32,12 +32,12 @@ const ModalSDM = ({ rowData }) => {
                 type="button"
                 className="btn btn-warning"
                 data-toggle="modal"
-                data-target={`#_id${rowData._id}`}
+                data-target={`#_id${rowData.id}`}
             >Edit</button>
 
             <div
                 className="modal"
-                id={`_id${rowData._id}`}
+                id={`_id${rowData.id}`}
                 onClick={() => setsdbmData(rowData)}
             >
                 <div className="modal-dialog">
@@ -63,7 +63,7 @@ const ModalSDM = ({ rowData }) => {
                                     type="text"
                                     classNameName="form-control"
                                     name="namaKaryawan"
-                                    defaultValue={rowData.namaKaryawan}
+
                                     placeholder={rowData.namaKaryawan}
                                     onInput={handlerChange.bind(this)}
                                 /></td>
@@ -74,7 +74,6 @@ const ModalSDM = ({ rowData }) => {
                                     type="date"
                                     classNameName="form-control"
                                     name="tgl_lahir"
-                                    defaultValue={rowData.tgl_lahir}
                                     placeholder={rowData.tgl_lahir}
                                     onInput={handlerChange.bind(this)}
                                 /></td>
@@ -85,7 +84,6 @@ const ModalSDM = ({ rowData }) => {
                                     type="text"
                                     classNameName="form-control"
                                     name="jk"
-                                    defaultValue={rowData.jk}
                                     placeholder={rowData.jk}
                                     onInput={handlerChange.bind(this)}
                                 /></td>
@@ -96,7 +94,6 @@ const ModalSDM = ({ rowData }) => {
                                     type="text"
                                     classNameName="form-control"
                                     name="alamat"
-                                    defaultValue={rowData.alamat}
                                     placeholder={rowData.alamat}
                                     onInput={handlerChange.bind(this)}
                                 /></td>
@@ -107,7 +104,6 @@ const ModalSDM = ({ rowData }) => {
                                     type="text"
                                     classNameName="form-control"
                                     name="no_telp"
-                                    defaultValue={rowData.no_telp}
                                     placeholder={rowData.no_telp}
                                     onInput={handlerChange.bind(this)}
                                 /></td>

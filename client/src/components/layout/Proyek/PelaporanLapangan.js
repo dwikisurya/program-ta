@@ -1,9 +1,11 @@
 import React, { useState, useEffect, Fragment } from 'react'
 import Navbar from '../Navbar'
-import _ from 'lodash'
+import _, { values } from 'lodash'
+import MaterialTable from "material-table"
 
 import hitpelaporan from '../../client/proyek/perkembangan.get'
 import postpelaporan from '../../client/proyek/perkembangan.post'
+import deletepelaporan from '../../client/proyek/perkembangan.delete'
 
 import hitscheduling from '../../client/proyek/scheduling.get'
 import hitrab from '../../client/proyek/rab.get'
@@ -43,52 +45,25 @@ const PelaporanLapangan = () => {
         }
     }
 
-    const testRender = () => {
-        // Group By IdSchedulingProyek
-        const groups = _.groupBy(pelaporan, 'idSchedulingProyek')
-        const keys = Object.keys(groups)
+    // Ambil Data GroupBy idscheduling dan uraiannya ap
+    var groups1 = _.groupBy(pelaporan, function (value) {
+        return value._id + '*' + value.idSchedulingProyek._id + '#' + value.uraian;
+    });
 
-        // Ambil Data GroupBy idscheduling dan uraiannya ap
-        var groups1 = _.groupBy(pelaporan, function (value) {
-            return value.idSchedulingProyek + '#' + value.uraian;
-        });
-        var data = _.map(groups1, function (group) {
-            return {
-                idSchedulingProyek: group[0].idSchedulingProyek,
-                uraian: group[0].uraian,
-                total: _.sumBy(group, x => x.persentase),
-                count: _.countBy(group, 'uraian'),
-                created_at: group[0].created_at
-            }
-        });
-        
-        return scheduling.map(sch => {
-            return keys.map(k => {
-                if (sch._id === k) {
-                    return (
-                        <tr>
-                            <td>{sch.idRabProyek.idProyek.namaProyek}</td>
-                            <td>
-                                {data.map(g1 => {
-                                    if (g1.idSchedulingProyek === k) {
-                                        return (
-                                            <tr>
-                                                <td>{g1.uraian}</td>
-                                                <td>{g1.total.toFixed(1)}</td>
-                                            </tr>
-                                        )
-                                    }
-                                })
-
-                                }</td>
-                        </tr>
-                    )
-
-
-                }
-            })
-        })
-    }
+    var result = _.map(groups1, function (group) {
+        return {
+            id: group[0]._id,
+            idSchedulingProyek: group[0].idSchedulingProyek,
+            namaProyek: group[0].idSchedulingProyek.idRabProyek.idProyek.namaProyek,
+            uraian: group[0].uraian,
+            persentase: group[0].persentase,
+            total: _.sumBy(group, x => x.persentase).toFixed(2),
+            count: _.countBy(group, 'uraian'),
+            idSDB: group[0].idSDB.map(v => Object.values(v).join('_')).join(','),
+            idSDM: group[0].idSDM.map(v => Object.values(v).join('_')).join(','),
+            created_at: group[0].created_at
+        }
+    });
 
     // Get Data SDB Form
     const [dataSDB, setDataSDB] = useState([])
@@ -172,22 +147,28 @@ const PelaporanLapangan = () => {
     const handleSubmit = e => {
         e.preventDefault();
         var groups1 = _.groupBy(pelaporan, function (value) {
-            return value.idSchedulingProyek + '#' + value.uraian;
+            return value.idSchedulingProyek._id + '#' + value.uraian;
         });
+
         var data = _.map(groups1, function (group) {
             return {
+                id: group[0]._id,
                 idSchedulingProyek: group[0].idSchedulingProyek,
+                namaProyek: group[0].idSchedulingProyek.idRabProyek.idProyek.namaProyek,
                 uraian: group[0].uraian,
-                total: _.sumBy(group, x => x.persentase),
-                count: _.countBy(group, 'uraian')
+                count: _.countBy(group, 'uraian'),
             }
         });
+        console.log(data)
+
         let a = formdata[0].uraian
-        let b = ''
-        let c = ''
+        let b = 0
+        let c = 0
 
         data.map(d1 => {
-            return b = d1.count[a]
+            if (formdata[0].idSchedulingProyek === d1.idSchedulingProyek._id && formdata[0].uraian === d1.uraian) {
+                return b = d1.count[a]
+            }
         })
 
         scheduling.map(sch => {
@@ -198,16 +179,24 @@ const PelaporanLapangan = () => {
         })
 
         if (b < c) {
-            console.log('Success')
+            alert('Berhasil menambah data pelaporan')
             postpelaporan(formdata[0])
             window.location = "/pelaporan"
         } else {
-            alert(`Data Uraian:` + a + ` sudah terpenuhi\nSilahkan isi data perkembangan yang lain`)
+            alert(`Data Tidak Boleh Kosong atau\nData Uraian:` + a + ` sudah terpenuhi\nSilahkan isi data perkembangan yang lain`)
         }
 
 
     };
-
+    const deleteRow = (id, e) => {
+        deletepelaporan(id)
+            .then(res => {
+                const statePelaporan = pelaporan.filter(_id => pelaporan._id !== id);
+                setPelaporan(statePelaporan)
+                alert('Data telah dihapus')
+                getData()
+            })
+    }
 
     useEffect(() => {
         getData()
@@ -220,7 +209,7 @@ const PelaporanLapangan = () => {
     return (
         <div className="container-fluid">
             <Navbar />
-            <div className="row">
+            <div className="row" style={{ margin: 10 }}>
                 <div className="col-md-6">
                     <form onSubmit={handleSubmit}>
                         <div className="form-row">
@@ -257,8 +246,6 @@ const PelaporanLapangan = () => {
                                             {renderSDB()}
                                         </select>
                                     </div>
-
-
                                 </Fragment>
                             ))}
                         </div>
@@ -267,22 +254,37 @@ const PelaporanLapangan = () => {
                                 className="btn btn-primary mr-2"
                                 type="submit"> Save
             </button>
+
                         </div>
                     </form>
                 </div>
 
 
                 <div className="col-md-6">
-                    <h5>Data Pelaporan</h5>
-                    <table className="table table-bordered table-responsive-md" id="Proyek">
-                        <thead>
-                            <tr>
-                                <th>Proyek</th>
-                                <th>Persentase</th>
-                            </tr>
-                        </thead>
-                        <tbody>{testRender()}</tbody>
-                    </table>
+                    <MaterialTable
+                        title="Data Pelaporan"
+                        columns={[
+                            { title: "ID", field: "id" },
+                            { title: "ID", field: "idSchedulingProyek._id", hidden: true },
+                            { title: "Nama Proyek", field: "idSchedulingProyek.idRabProyek.idProyek.namaProyek", defaultGroupOrder: 0 },
+                            { title: "Uraian", field: "uraian", defaultGroupOrder: 0 },
+                            { title: "Sumber Daya Digunakan", field: "idSDB" },
+                            { title: "Sumber Daya Bekerja", field: "idSDM" },
+                            { title: "Persentase", field: "persentase" },
+                        ]}
+                        data={(result)}
+                        options={{
+                            grouping: true,
+                            actionsColumnIndex: -1
+                        }}
+                        actions={[
+                            {
+                                icon: 'delete',
+                                tooltip: 'Delete Data',
+                                onClick: (e, rowData) => deleteRow(rowData.id, e)
+                            }
+                        ]}
+                    />
                 </div>
             </div>
         </div>

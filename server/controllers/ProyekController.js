@@ -11,7 +11,7 @@ module.exports = class ProyekController {
         const projectmanager = req.body.projectManager
         const clientproyek = req.body.clientProyek
         const lokasiproyek = req.body.lokasiProyek
-        const statusproyek = req.body.statusProyek
+        const statusproyek = "Created"
         const created_at = Date.now()
         const updated_at = Date.now()
         const accepted_at = Date.now()
@@ -53,6 +53,26 @@ module.exports = class ProyekController {
                 res.status(500).send(err)
             } else {
                 res.status(200).send(docs)
+            }
+        })
+    }
+
+    static updateStatus(req, res) {
+        const id = req.params.id
+        const statusProyek = req.body.statusProyek
+        const updated_at = Date.now()
+
+        const dataupdate = {
+            statusProyek: statusProyek,
+            updated_at: updated_at
+        }
+
+        proyek.findByIdAndUpdate(id, dataupdate, { new: true }, function (err, docs) {
+            if (err) {
+                res.status(500).send(err)
+            } else {
+                res.status(200).send(docs)
+                console.log(docs)
             }
         })
     }

@@ -44,8 +44,6 @@ const Proyek = () => {
         }
     });
 
-
-
     // Get For Kategori
     const [datakategori, setDataKategori] = useState([])
     const getKategori = async () => {
@@ -56,6 +54,7 @@ const Proyek = () => {
             console.log(kategori)
         }
     }
+
     const renderKategori = () => {
         return datakategori.map(kategorii => {
             return (
@@ -97,12 +96,14 @@ const Proyek = () => {
 
     const handlerSubmit = (e) => {
         e.preventDefault()
-        if (formdata != null) {
-            postproyek(formdata)
-            // window.location = "/"
-            console.log(formdata)
+        const a = (Object.keys(formdata).length)
+        if (a < 5) {
+            alert('Gagal menambah data dengan field kosong')
         } else {
-            console.log('Error')
+            console.log(formdata)
+            postproyek(formdata)
+            alert('Data berhasil ditambah')
+            window.location = "/proyek"
         }
     }
 
@@ -112,7 +113,7 @@ const Proyek = () => {
             .then(res => {
                 const stateProyek = proyek.filter(_id => proyek._id !== id);
                 setProyek(stateProyek)
-                console.log('Data telah dihapus')
+                alert('Data telah dihapus')
                 getData()
             })
     }
@@ -120,7 +121,7 @@ const Proyek = () => {
     return (
         <div className="container-fluid">
             <Navbar />
-            <div className="row">
+            <div className="row" style={{ margin: 10 }}>
                 <div className="col-md-4">
                     <form onSubmit={handlerSubmit}>
                         <div className="form-group">
@@ -130,6 +131,7 @@ const Proyek = () => {
                         </div>
                         <div className="form-group">
                             <label htmlFor="inp_idpekerjaanrab">Kategori Proyek</label>
+                            {/* <Select className="form-control" name="kategoriProyek" options={dataRenderKategori} onInput={option => this.handlerChange(option.value, "id")} /> */}
                             <select className="form-control" name="kategoriProyek" onInput={handlerChange.bind(this)}>
                                 <option>     </option>
                                 {renderKategori()}
@@ -150,10 +152,6 @@ const Proyek = () => {
                             <label htmlFor="inp_lokasiproyek">Lokasi</label>
                             <input type="text" className="form-control" name="lokasiProyek" onInput={handlerChange.bind(this)} />
                         </div>
-                        <div className="form-group">
-                            <label htmlFor="inp_lokasiproyek">Status Proyek</label>
-                            <input type="text" className="form-control" name="statusProyek" onInput={handlerChange.bind(this)} />
-                        </div>
                         <button type="submit" className="btn btn-primary">Submit</button>
 
 
@@ -162,7 +160,7 @@ const Proyek = () => {
 
                 <div className="col-md-8">
                     <MaterialTable
-                        title="Data RAB"
+                        title="Data Proyek"
                         columns={[
                             { title: "ID", field: "id", hidden: true },
                             { title: "Nama Proyek", field: "namaProyek" },

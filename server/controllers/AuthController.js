@@ -6,22 +6,14 @@ const bcrypt = require('bcryptjs')
 module.exports = class AuthController {
 
     static register(req, res) {
-        const email = req.body.email
-        const password = req.body.password
-        const fullName = req.body.fullName
-
-        const isWoman = req.body.isWoman === 'true' ? true : false
-
-
+        const { email, password, role } = req.body
         function validateemail(email) {
             const emailRegex = /^[-!#$%&'*+\/0-9=?A-Z^_a-z{|}~](\.?[-!#$%&'*+\/0-9=?A-Z^_a-z`{|}~])*@[a-zA-Z0-9](-*\.?[a-zA-Z0-9])*\.[a-zA-Z](-?[a-zA-Z0-9])+$/
             if (email.match(emailRegex)) {
                 User.create({
-                    email: email,
-                    password: password,
-                    fullName: fullName,
-                    isWorman: isWoman,
-
+                    email,
+                    password,
+                    role
                 }).then((result) => {
                     res.status(201).json(result)
                 }).catch((err) => {
@@ -31,7 +23,6 @@ module.exports = class AuthController {
                 res.status(403).json({ msg: 'Email Tidak Sesuai' })
             }
         }
-
         validateemail(email)
     }
 
@@ -56,7 +47,7 @@ module.exports = class AuthController {
                 bcrypt.compare(password, result.password)
                     .then(isValid => {
                         if (isValid) {
-                            const token = jwt.sign({ id: result._id }, process.env.SECRET)
+                            const token = jwt.sign({ id: result._id, role: result.role }, process.env.SECRET)
                             res.status(200).json({ token })
                             console.log(token)
                         } else {

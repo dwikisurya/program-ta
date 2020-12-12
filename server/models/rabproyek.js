@@ -23,7 +23,7 @@ const rabSchema = new Schema({
     }],
     status: String,
     grandTotal: Number,
-    accepted_at: Date,
+    created_at: Date,
     updated_at: Date
 })
 

@@ -1,35 +1,64 @@
-import React from 'react'
-import logo from '../logoP.png'
+import React, { useState } from 'react'
+import Form from 'react-bootstrap/Form'
+import Button from 'react-bootstrap/Button'
+
+import postlogin from '.././client/login.post'
 
 const SignIn = () => {
-    return (
-        <div class="container-fluid">
-            <div class="row d-flex align-items-center min-vh-100">
-                <div class="col-md-8" style={{ background: 'lightblue', display: 'block' }}>
-                </div>
-                <div class="col-md-4" style={{ background: 'white', display: 'block' }}>
-                    <center><img src={logo} sizes='100%'></img></center>
-                    <form>
-                        <div class="form-group">
-                            <label for="exampleInputEmail1">
-                                Username
-					    </label>
-                            <input type="email" class="form-control" id="exampleInputEmail1" />
-                        </div>
-                        <div class="form-group">
 
-                            <label for="exampleInputPassword1">
-                                Password
-					</label>
-                            <input type="password" class="form-control" id="exampleInputPassword1" />
+    const [formdata, setFormData] = useState([])
+
+    function validateForm() {
+        return formdata.length > 0;
+    }
+
+    const handleSubmit = (e) => {
+        setFormData(formdata => ({ ...formdata, [e.target.name]: e.target.value }));
+    }
+
+    const handlerSubmit = async (e) => {
+        try {
+            e.preventDefault()
+            const result = await postlogin(formdata)
+            if (result.status === 200) {
+                const { token } = result.data
+                localStorage.setItem('token', token)
+                window.location = '/'
+                return
+            } else {
+                alert('Email/Password Salah')
+            }
+        } catch (error) {
+
+        }
+    }
+
+    return (
+        <div className="container">
+            <div className="row">
+                <div className="col-sm-9 col-md-7 col-lg-5 mx-auto">
+                    <div className="card card-signin my-5">
+                        <div className="card-body">
+                            <h5 className="card-title text-center">Sign In</h5>
+                            <form onSubmit={handlerSubmit}>
+                                <div className="form-label-group">
+                                    <label htmlFor="inputEmail">Email address</label>
+                                    <input type="email" name="email" class="form-control" placeholder="Email address" required autofocus onChange={handleSubmit.bind(this)} />
+                                </div>
+
+                                <div className="form-label-group">
+                                    <label htmlFor="inputPassword">Password</label>
+                                    <input type="password" name="password" class="form-control" placeholder="Password" required onChange={handleSubmit.bind(this)} />
+                                </div>
+                                <br />
+                                <button className="btn btn-lg btn-primary btn-block text-uppercase" type="submit">Sign in</button>
+
+                            </form>
                         </div>
-                        <button type="submit" class="btn btn-primary">
-                            Submit
-				</button>
-                    </form>
+                    </div>
                 </div>
             </div>
-        </div >
+        </div>
     )
 
 }

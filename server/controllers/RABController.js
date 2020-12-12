@@ -12,13 +12,16 @@ module.exports = class RABController {
         const grand = req.body.grandTotal
         const updated_at = Date.now()
         const status = "Created"
+        const created_at = Date.now()
 
         rabproyek.create({
             idProyek: idproyek,
             rab: rabdarirequst,
-            updated_at: updated_at,
             status: status,
-            grandTotal: grand
+            grandTotal: grand,
+            updated_at: updated_at,
+            created_at: created_at
+            
         }).then((result) => {
             res.status(201).json({ msg: 'Data Berhasil Ditambah' })
             console.log(result)
@@ -83,7 +86,6 @@ module.exports = class RABController {
         const id = req.params.id
         const updated_at = Date.now()
 
-
         const dataupdate = {
             idProyek: req.body.idProyek,
             rab: req.body.rab,
@@ -99,5 +101,24 @@ module.exports = class RABController {
             }
         })
 
+    }
+
+    static updateStatus(req, res) {
+        const id = req.params.id
+        const status = req.body.status
+        const updated_at = Date.now()
+
+        const dataupdate = {
+            status: status,
+            updated_at: updated_at
+        }
+
+        rabproyek.findByIdAndUpdate(id, dataupdate, { new: true }, function (err, docs) {
+            if (err) {
+                res.status(500).send(err)
+            } else {
+                res.status(200).send(docs)
+            }
+        })
     }
 }

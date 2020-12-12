@@ -1,10 +1,11 @@
 import axios from 'axios'
 
-export default async (reqBody) => {
+export default async (idform, reqBody) => {
+    console.log(reqBody)
     try {
         let res = await axios({
             method: 'PUT',
-            url: `http://localhost:5000/proyek/${reqBody.id}`,
+            url: `http://localhost:5000/proyek/status/${idform}`,
             data: reqBody
         })
         console.log(`Status code: ${res.status}`);

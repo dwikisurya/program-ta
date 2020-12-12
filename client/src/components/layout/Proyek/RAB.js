@@ -1,13 +1,14 @@
 import React, { useState, useEffect, Fragment } from 'react'
 import Navbar from '../Navbar'
 import ModalRAB from './ModalRAB'
-import _ from 'lodash'
+import _, { update } from 'lodash'
 import MaterialTable from "material-table"
 
 import hitrab from '../../client/proyek/rab.get'
 import deleterab from '../../client/proyek/rab.delete'
 import postrab from '../../client/proyek/rab.post'
 
+import putproyekstatus from '../../client/proyek/proyek.status.put'
 import hitproyek from '../../client/proyek/proyek.get'
 import hitpekerjaan from '../../client/sumberdaya/kegiatanproyek.get'
 
@@ -45,7 +46,6 @@ const RAB = () => {
     const result = _.flatMap(huwala, ({ id, namaProyek, uraian, idKegiatanProyek, status }) =>
         _.map(idKegiatanProyek, tag => ({ id, namaProyek, uraian, status, ...tag }))
     );
-    console.log(result)
 
     // Populate Select For Proyek 
     const [dataProyek, setDataProyek] = useState([])
@@ -53,7 +53,6 @@ const RAB = () => {
         const proyek = await hitproyek()
         if (proyek.status === 200) {
             setDataProyek(proyek.data)
-
         } else {
             console.log('Error')
         }
@@ -91,6 +90,9 @@ const RAB = () => {
         { uraianPekerjaan: '', idKegiatanProyek: {}, hargaKegiatan: {}, volume: '', totalHarga: '', grandTotal: '' }
     ]);
 
+    const [updateProyek, setUpdateDataProyek] = useState({
+        statusProyek: 'RAB Accepted'
+    })
     const [formproyek, setFormProyek] = useState([])
     const handlerChange = (e) => {
         setFormProyek(formdata => ({ ...formdata, [e.target.name]: e.target.value }))
@@ -120,11 +122,8 @@ const RAB = () => {
 
         const sumAll = sum.reduce((result, number) => result + number);
         values[index].totalHarga = sumAll
-
         setFormData(values)
-
     };
-
 
     const handleSubmit = e => {
         e.preventDefault();
@@ -165,7 +164,10 @@ const RAB = () => {
             for (let i = 0; i < formdata.length; i++) {
                 total += formdata[i].totalHarga
             }
+
             postrab(formdata, idform, total)
+            putproyekstatus(idform, updateProyek)
+            alert('Data berhasil ditambah')
             window.location = "/proyek/rab"
         } else {
             alert(`Data RAB:` + b + ` sudah dibuat, silahkan edit atau tambahkan data RAB lainnya`)
@@ -191,7 +193,7 @@ const RAB = () => {
             .then(res => {
                 const rabq = rab.filter(_id => rab._id !== id);
                 setRab(rabq)
-                console.log('Data telah dihapus')
+                alert('Data telah dihapus')
                 getData()
             })
     }
@@ -207,14 +209,14 @@ const RAB = () => {
         <div>
             <Navbar />
             <div className="container-fluid">
-                <div className="row clearfix">
+                <div className="row clearfix" style={{ margin: 10 }}>
 
                     <div className="col-md-5">
                         <h5>Input RAB</h5>
                         <form onSubmit={handleSubmit}>
                             <div className="form-row">
                                 <label htmlFor="idProyek">ID Proyek</label>
-                                <select className="form-control" id="idProyek" name="idProyek" onChange={handlerChange} required>
+                                <select className="form-control" id="idProyek" name="idProyek" onChange={handlerChange.bind(this)} required>
                                     <option value="">     </option>
                                     {renderProyek()}
                                 </select>

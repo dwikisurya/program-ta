@@ -1,12 +1,14 @@
 import { React, useState, useEffect } from 'react'
 import Navbar from '../Navbar'
 import dateFormat from 'dateformat'
-import _ from 'lodash'
-import MaterialTable from "material-table"
+import _, { fromPairs } from 'lodash'
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
 
 import hitrab from '../../client/proyek/rab.get'
 import hitscheduling from '../../client/proyek/scheduling.get'
 import hitpelaporan from '../../client/proyek/perkembangan.get'
+import hitproyek from '../../client/proyek/proyek.get'
 
 const LaporanProyek = () => {
     // RAB
@@ -41,12 +43,11 @@ const LaporanProyek = () => {
     var groupsRABQ = _.groupBy(huwalaRABA, function (value) {
         return value.id + '#' + value.namaProyek + '#' + value.uraian
     });
-    console.log({ groupsRABQ })
     var dataRABQ = _.map(groupsRABQ, function (group) {
         return {
             id: group[0].id,
             namaProyek: group[0].namaProyek,
-            idKegiatanProyek: group[0].idKegiatanProyek,
+            idKegiatanProyek: group[0].idKegiatanProyek.map(v => Object.values(v).join('_')).join(','),
             uraian: group[0].uraian,
             hargaKegiatan: group[0].hargaKegiatan,
             volume: group[0].volume,
@@ -55,7 +56,7 @@ const LaporanProyek = () => {
     });
 
     var groupsRABQQ = _.groupBy(huwalaRABA, function (value) {
-        return value.id + '#' + value.namaProyek + '#' + value.uraian
+        return value.namaProyek + '#' + value.uraian
     });
 
     var dataRABQQ = _.map(groupsRABQQ, function (group) {
@@ -69,30 +70,7 @@ const LaporanProyek = () => {
             totalHarga: group[0].totalHarga
         }
     });
-
-    const huwalaRABAA = _.flatMap(dataRABQQ, ({ id, namaProyek, uraian, idKegiatanProyek, volume }) =>
-        _.flatMap(idKegiatanProyek, ({ namaKegiatan }) => ({ id: id, namaProyek: namaProyek, uraian: uraian, namaKegiatan: namaKegiatan, volume: volume }))
-    )
-
-    const huwalaRABAB = _.flatMap(dataRABQQ, ({ id, namaProyek, uraian, volume }) =>
-        _.flatMap(volume, ({ volume }) => ({ id: id, namaProyek: namaProyek, uraian: uraian, volume: volume }))
-    )
-
-
-    var merge = _.unionBy(huwalaRABAA, huwalaRABAB);
-    var merge2 = _.map(huwalaRABA, function (item) {
-        return _.merge(item, _.find(huwalaRABAB, { namaKegiatan: item.namaKegiatan, 'volume': item.volume }));
-    });
-
-
-    // Map Volume
-    // const laporanRABC = _.flatMap(huwalaRAB, ({ id, namaProyek, uraian, status, totalHarga, volume }) =>
-    //     _.map(volume, tag => ({ id, namaProyek, uraian, status, totalHarga, ...tag }))
-    // );
-
-    // const a = _.merge(laporanRABA, laporanRABB)
-    // const b = _.defaultsDeep(laporanRABA, laporanRABB)
-
+    console.log({ groupsRABQQ, dataRABQQ })
 
     // Scheduling
     const [scheduling, setScheduling] = useState([])
@@ -116,6 +94,7 @@ const LaporanProyek = () => {
             created_at: dateFormat(group[0].created_at, "dd mmmm yyyy")
         }
     });
+
     const dataSch = _.flatMap(mapSCH, ({ id, namaProyek, sch, created_at }) =>
         _.flatMap(sch, ({ uraianPekerjaan, tglKerja, bobotKegiatan, bobotPekerjaan, perkiraanDurasi, created_at }) => ({ id: id, namaProyek: namaProyek, uraian: uraianPekerjaan[0], tglKerja: tglKerja, bobotKegiatan: bobotKegiatan, bobotPekerjaan: bobotPekerjaan, perkiraanDurasi: perkiraanDurasi, created_at: created_at }))
     )
@@ -133,6 +112,20 @@ const LaporanProyek = () => {
         }
     });
 
+    const rendertableSch = () => {
+        return laporanSch.map(schq => {
+            if (schq.namaProyek === formData.namaProyek) {
+                return (
+                    <tr key={schq.id}>
+                        <td>{schq.uraian}</td>
+                        <td>{schq.perkiraanDurasi}</td>
+                        <td>{schq.tglKerja}</td>
+                        <td>{schq.perkiraanBerakhir}</td>
+                    </tr>
+                )
+            }
+        })
+    }
 
     // Pelaporan
     const [pelaporan, setPelaporan] = useState([])
@@ -156,111 +149,174 @@ const LaporanProyek = () => {
             uraian: group[0].uraian,
             persentase: group[0].persentase,
             total: _.sumBy(group, x => x.persentase).toFixed(2),
-            idSDB: group[0].idSDB.map(v => Object.values(v).join('_')).join(','),
-            idSDM: group[0].idSDM.map(v => Object.values(v).join('_')).join(','),
+            idSDB: group[0].idSDB,
+            idSDM: group[0].idSDM,
         }
     });
-    console.log({ laporanSch, laporanPelaporan })
 
+    const rendertablePelaporan = () => {
+        return laporanPelaporan.map(lp1 => {
+            if (lp1.namaProyek === formData.namaProyek) {
+                return (
+                    <tr key={lp1.id}>
+                        <td>{lp1.uraian}</td>
+                        <td> {lp1.idSDB.map(nb => {
+                            return <tr colSpan={nb.length}>{nb.namaBarang + ','}</tr>
+                        })}
+                        </td>
+                        <td> {lp1.idSDM.map(nm => {
+                            return <tr colSpan={nm.length}>{nm.namaKaryawan + ','}</tr>
+                        })}
+                        </td>
+
+                    </tr>
+                )
+            }
+        })
+    }
+    const rendertableRAB = () => {
+        return dataRABQQ.map(rabq => {
+            if (rabq.namaProyek === formData.namaProyek) {
+                return (
+                    <tr key={rabq.id}>
+                        <td>{rabq.uraian}</td>
+                        <td> {rabq.idKegiatanProyek.map(nm => {
+                            return <tr colSpan={nm.length}>{nm.namaKegiatan + ','}
+
+                            </tr>
+                        })}
+                        </td>
+                        <td> {rabq.volume.map(nb => {
+                            return <tr colSpan={nb.length}>{nb + ','}</tr>
+                        })}
+                        </td>
+                        <td>{rabq.totalHarga} </td>
+                    </tr>
+                )
+            }
+        })
+    }
+
+    const exportPDFRAB = () => {
+        const doc = new jsPDF()
+        autoTable(doc, {
+            html: '#RAB'
+        })
+        doc.save('rab.pdf')
+    }
+    const exportPDFSCHEDULING = () => {
+        const doc = new jsPDF()
+        autoTable(doc, {
+            html: '#SCheduling'
+        })
+        doc.save('scheduling.pdf')
+    }
+    const exportPDFPELAPORAN = () => {
+        const doc = new jsPDF()
+        autoTable(doc, {
+            html: '#Pelaporan'
+        })
+        doc.save('pelaporan.pdf')
+    }
+
+    const [proyek, setProyek] = useState([])
+    const [formData, setFormData] = useState([])
+    const getProyek = async () => {
+        const proyekHit = await hitproyek()
+        if (proyekHit.status = 200) {
+            setProyek(proyekHit.data)
+        } else {
+            console.log('Error')
+        }
+    }
+    const renderProyek = () => {
+        return proyek.map(proyekq => {
+            return (
+                <option key={proyekq._id} value={proyekq.namaProyek} name={proyekq.namaProyek}>{proyekq.namaProyek}</option>
+            )
+        })
+    }
+
+    const handlerChange = (e) => {
+        e.preventDefault();
+        setFormData(formdata => ({ ...formdata, [e.target.name]: e.target.value }))
+    }
     useEffect(() => {
         getRAB()
         getSCheduling()
         getPelaporan()
+        getProyek()
     }, [])
 
 
     return (
         <div className="container-fluid">
             <Navbar />
-            <div className="row">
-                <div className="col-md-6">
-                    <MaterialTable
-                        title="Laporan RAB"
-                        columns={[
-                            { title: "Nama Proyek", field: "namaProyek", defaultGroupOrder: 0 },
-                            { title: "Uraian", field: "uraian" },
-                            {
-                                title: "Nama Kegiatan", field: "idKegiatanProyek", render:
-                                    (rowData) => {
-                                        return <div>
-                                            {rowData.idKegiatanProyek.map(v => {
-                                                return <p>{v.namaKegiatan}</p>
-                                            })}
-                                        </div>
-                                    }
-                            },
-                            {
-                                title: "Harga Kegiatan", field: "hargaKegiatan", render:
-                                    (rowData) => {
-                                        return <div>
-                                            {rowData.hargaKegiatan.map(v => {
-                                                return <p>{v}</p>
-                                            })}
-                                        </div>
-                                    }
-                            },
-                            {
-                                title: "Volume", field: "volume", render:
-                                    (rowData) => {
-                                        return <div>
-                                            {rowData.volume.map(v => {
-                                                return <p>{v}</p>
-                                            })}
-                                        </div>
-                                    }
-                            },
-                            { title: "Total Harga", field: "totalHarga" },
-                        ]}
-                        data={(dataRABQ)}
-                        options={{
-                            grouping: true,
-                            exportButton: true,
-                            exportAllData: true,
-                        }}
-                    />
-                    <br /><br />
-                    <MaterialTable
-                        title="Laporan Scheduling"
-                        columns={[
-                            { title: "Nama Proyek", field: "namaProyek", defaultGroupOrder: 0 },
-                            { title: "Uraian", field: "uraian" },
-                            { title: "Bobot Kegiatan", field: "bobotKegiatan" },
-                            { title: "Bobot Pekerjaan", field: "bobotPekerjaan" },
-                            { title: "Tanggal Kerja", field: "tglKerja" },
-                            { title: "Durasi", field: "perkiraanDurasi" },
-                            { title: "Perkiraan Berakhir", field: "perkiraanBerakhir" },
-                        ]}
-                        data={(laporanSch)}
-                        options={{
-                            grouping: true,
-                            exportButton: true,
-                            exportAllData: true,
-                        }}
-                    />
+            <div className="row" style={{ margin: 10 }}>
+
+                <div className="row" style={{ margin: 10 }}>
+                    <div className="col-md-12">
+                        <select className="form-control" name="namaProyek" onChange={handlerChange.bind(this)}>
+                            <option>     </option>
+                            {renderProyek()}
+                        </select><button type="button" className="btn btn-warning" onClick={() => window.location = "/laporan/proyek"}>Clear</button>
+                    </div>
+                </div>
+
+                <div className="row">
+                    <div className="col-md-4">
+                        <h5>RAB</h5>
+                        <table className="table table-bordered" id="RAB">
+                            <thead>
+                                <tr>
+                                    <th>Uraian Pekerjaan</th>
+                                    <th>Data Kegiatan</th>
+                                    <th>Volume</th>
+                                    <th>Total Harga</th>
+                                </tr>
+                            </thead>
+                            <tbody>{rendertableRAB()}</tbody>
+                        </table>
+                        <button type="button" class="btn btn-primary" onClick={() => exportPDFRAB()}>Download</button>
+                    </div>
+
+                    <div className="col-md-4">
+                        <h5>Scheduling</h5>
+                        <table className="table table-bordered" id="Scheduling">
+                            <thead>
+                                <tr>
+                                    <th>Uraian Pekerjaan</th>
+                                    <th>Durasi Pekerjaan</th>
+                                    <th>Tanggal Kerja</th>
+                                    <th>Perkiraan Berakhir</th>
+                                </tr>
+                            </thead>
+                            <tbody>{rendertableSch()}</tbody>
+                        </table>
+                        <button type="button" class="btn btn-primary" onClick={() => exportPDFSCHEDULING()}>Download</button>
+                    </div>
+
+                    <div className="col-md-4">
+                        <h5>Perkembangan Proyek</h5>
+                        <table className="table table-bordered" id="Pelaporan">
+                            <thead>
+                                <tr>
+                                    <th>Uraian Pekerjaan</th>
+                                    <th>SDB Digunakan</th>
+                                    <th>SDM Bekerja</th>
+                                </tr>
+                            </thead>
+                            <tbody>{rendertablePelaporan()}</tbody>
+                        </table>
+                        <button type="button" class="btn btn-primary" onClick={() => exportPDFPELAPORAN()}>Download</button>
+                    </div>
+
                 </div>
 
 
 
-                <div className="col-md-6">
-                    <MaterialTable
-                        title="Laporan Pelaporan"
-                        columns={[
-                            { title: "Nama Proyek", field: "namaProyek", defaultGroupOrder: 0 },
-                            { title: "Uraian", field: "uraian" },
-                            { title: "SD Barang Digunakan", field: "idSDB" },
-                            { title: "SD Manusia Bekerja", field: "idSDM" },
-                            { title: "Persentase", field: "persentase" },
-                        ]}
-                        data={(laporanPelaporan)}
-                        options={{
-                            grouping: true,
-                            exportButton: true,
-                            exportAllData: true,
-                        }}
-                    />
-                </div>
             </div>
-        </div>
+        </div >
     )
 }
 

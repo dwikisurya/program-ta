@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import Navbar from '../Navbar'
+import Swal from 'sweetalert2'
 
 import ModalKategoriProyek from './ModalKategoriProyek'
 import MaterialTable from "material-table"
@@ -36,12 +37,42 @@ const KategoriProyek = () => {
         e.preventDefault()
         const a = (Object.keys(formdata).length)
         if (a < 2) {
-            alert("Harap isi field yang kosong")
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 1000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            })
+            Toast.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Harap isi Field yang kosong',
+            })
         } else {
-            console.log('Success')
             postkategori(formdata)
-            alert("Success tambah data")
-            window.location = "/sumberdaya/kategori"
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 1000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            })
+            Toast.fire({
+                icon: 'success',
+                title: 'Data telah ditambah'
+            }).then(res => {
+                getData()
+            })
+            return
         }
     }
 
@@ -51,7 +82,21 @@ const KategoriProyek = () => {
             .then(res => {
                 const statekategori = kategoriProyek.filter(_id => kategoriProyek._id !== id);
                 setkategoriData(statekategori)
-                alert(`Data id:` + id + `telah dihapus`)
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 1000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                })
+                Toast.fire({
+                    icon: 'success',
+                    title: `Data id:` + id + `telah dihapus`
+                })
                 getData()
             })
     }

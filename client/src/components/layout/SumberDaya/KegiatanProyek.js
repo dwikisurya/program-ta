@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import Navbar from '../Navbar'
+import Swal from 'sweetalert2'
 
 import ModalKegiatanProyek from './ModalKegiatanProyek'
 import _ from 'lodash'
@@ -50,13 +51,42 @@ const KegiatanProyek = () => {
         e.preventDefault()
         const a = (Object.keys(formdata).length)
         if (a < 4) {
-            alert("Harap isi field yang kosong")
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 1000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            })
+            Toast.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Harap isi Field yang kosong',
+            })
 
         } else {
-            console.log('Success')
             postkegiatan(formdata)
-            alert("Success tambah data")
-            window.location = "/sumberdaya/kegiatan"
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 1000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            })
+            Toast.fire({
+                icon: 'success',
+                title: 'Data telah ditambah'
+            }).then(res => {
+                getData()
+            })
         }
     }
 
@@ -64,9 +94,23 @@ const KegiatanProyek = () => {
     const deleteRow = (id, e) => {
         deletekegiatan(id)
             .then(res => {
-                alert(`Data dengan id:` + id + `telah dihapus`)
                 const statekegiatan = kegiatanProyek.filter(_id => kegiatanProyek._id !== id);
                 setkegiatanData(statekegiatan)
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 1000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                })
+                Toast.fire({
+                    icon: 'success',
+                    title: `Data id:` + id + `telah dihapus`
+                })
                 getData()
             })
     }

@@ -1,8 +1,9 @@
 import React, { useState, useEffect, Fragment } from 'react'
 import Navbar from '../Navbar'
 import ModalRAB from './ModalRAB'
-import _, { update } from 'lodash'
+import _ from 'lodash'
 import MaterialTable from "material-table"
+import Swal from 'sweetalert2'
 
 import hitrab from '../../client/proyek/rab.get'
 import deleterab from '../../client/proyek/rab.delete'
@@ -167,10 +168,40 @@ const RAB = () => {
 
             postrab(formdata, idform, total)
             putproyekstatus(idform, updateProyek)
-            alert('Data berhasil ditambah')
-            window.location = "/proyek/rab"
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 2000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            })
+            Toast.fire({
+                icon: 'success',
+                title: 'Data telah ditambah'
+            }).then(res => {
+                getData()
+            })
         } else {
-            alert(`Data RAB:` + b + ` sudah dibuat, silahkan edit atau tambahkan data RAB lainnya`)
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 2000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            })
+            Toast.fire({
+                icon: 'error',
+                title: 'Error',
+                text: `Data RAB:` + b + ` sudah dibuat, silahkan edit atau tambahkan data RAB lainnya`,
+            })
         }
     };
 
@@ -193,7 +224,21 @@ const RAB = () => {
             .then(res => {
                 const rabq = rab.filter(_id => rab._id !== id);
                 setRab(rabq)
-                alert('Data telah dihapus')
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 1000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                })
+                Toast.fire({
+                    icon: 'success',
+                    title: `Data id:` + id + `telah dihapus`
+                })
                 getData()
             })
     }

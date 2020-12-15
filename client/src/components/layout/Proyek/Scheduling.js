@@ -3,6 +3,7 @@ import Navbar from '../Navbar'
 import dateFormat from 'dateformat'
 import _ from 'lodash'
 import MaterialTable from "material-table"
+import Swal from 'sweetalert2'
 
 import putrabstatus from '../../client/proyek/rab.status.put'
 import hitscheduling from '../../client/proyek/scheduling.get'
@@ -166,14 +167,44 @@ const Scheduling = () => {
         console.log({ data, idRAB, c })
 
         if (c < 1 || c === undefined) {
-            alert('Berhasil menambah data scheduling')
             const idRAB = formRAB.idRabProyek
             postscheduling(formdata, idRAB)
             putrabstatus(idRAB, statusRAB)
-            window.location = "/proyek/scheduling"
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 2000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            })
+            Toast.fire({
+                icon: 'success',
+                title: 'Data telah ditambah'
+            }).then(res => {
+                getData()
+            })
         } else {
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 2000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            })
+            Toast.fire({
+                icon: 'error',
+                title: 'Error',
+                text: `Gagal menambah data scheduling:` + formRAB.idRabProyek + ` karena data sudah ada`,
+            })
 
-            alert(`Gagal menambah data scheduling:` + formRAB.idRabProyek + ` karena data sudah ada`)
         }
     };
 
@@ -183,7 +214,21 @@ const Scheduling = () => {
             .then(res => {
                 const schdulingq = scheduling.filter(_id => scheduling._id !== id);
                 setScheduling(schdulingq)
-                alert('Data telah dihapus')
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 1000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                })
+                Toast.fire({
+                    icon: 'success',
+                    title: `Data id:` + id + `telah dihapus`
+                })
                 getData()
             })
     }

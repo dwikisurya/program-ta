@@ -1,5 +1,6 @@
 import React from 'react'
 import Logo from './Logo'
+import Swal from 'sweetalert2'
 
 const Navbar = () => {
     const role = localStorage.getItem('role') || null
@@ -76,7 +77,23 @@ const Navbar = () => {
                                 <a className="nav-link">{`Halo, ` + role}</a>
                                 <a className="nav-link" href="#" onClick={function () {
                                     localStorage.clear()
-                                    window.location = '/login'
+                                    const Toast = Swal.mixin({
+                                        toast: true,
+                                        position: 'top-end',
+                                        showConfirmButton: false,
+                                        timer: 2000,
+                                        timerProgressBar: true,
+                                        didOpen: (toast) => {
+                                            toast.addEventListener('mouseenter', Swal.stopTimer)
+                                            toast.addEventListener('mouseleave', Swal.resumeTimer)
+                                        }
+                                    })
+                                    Toast.fire({
+                                        icon: 'success',
+                                        title: 'Logout Berhasil'
+                                    }).then(res => {
+                                        window.location = '/login'
+                                    })
                                 }}>Log Out</a>
                             </div>
 

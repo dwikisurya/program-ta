@@ -49,7 +49,6 @@ module.exports = class AuthController {
                         if (isValid) {
                             const token = jwt.sign({ id: result._id, role: result.role }, process.env.SECRET)
                             res.status(200).json({ token })
-                            console.log(token)
                         } else {
                             res.status(403).json({ msg: 'Email / Password Salah' })
                         }

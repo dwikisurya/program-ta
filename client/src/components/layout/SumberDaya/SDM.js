@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import Navbar from '../Navbar'
+import Swal from 'sweetalert2'
 
 import ModalSDM from './ModalSDM'
 import MaterialTable from "material-table"
@@ -52,12 +53,41 @@ const SDM = () => {
         e.preventDefault()
         const a = (Object.keys(formdata).length)
         if (a < 5) {
-            alert("Harap isi field yang kosong")
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 1000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            })
+            Toast.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Harap isi Field yang kosong',
+            })
         } else {
-            console.log('Succes')
             postsdm(formdata)
-            alert("Success tambah data")
-            window.location = "/sumberdaya/manusia"
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 1000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            })
+            Toast.fire({
+                icon: 'success',
+                title: 'Data telah ditambah'
+            }).then(res => {
+                getData()
+            })
         }
     }
 
@@ -67,7 +97,21 @@ const SDM = () => {
             .then(res => {
                 const statesdm = sdmData.filter(_id => sdmData._id !== id);
                 setsdmData(statesdm)
-                alert(`Data dengan id:` + id + `sudah dihapus`)
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 1000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                })
+                Toast.fire({
+                    icon: 'success',
+                    title: `Data id:` + id + `telah dihapus`
+                })
                 getData()
             })
     }

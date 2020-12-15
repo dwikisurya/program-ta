@@ -1,7 +1,8 @@
 import React, { useState, useEffect, Fragment } from 'react'
 import Navbar from '../Navbar'
-import _, { values } from 'lodash'
+import _ from 'lodash'
 import MaterialTable from "material-table"
+import Swal from 'sweetalert2'
 
 import hitpelaporan from '../../client/proyek/perkembangan.get'
 import postpelaporan from '../../client/proyek/perkembangan.post'
@@ -179,11 +180,41 @@ const PelaporanLapangan = () => {
         })
 
         if (b < c) {
-            alert('Berhasil menambah data pelaporan')
             postpelaporan(formdata[0])
-            window.location = "/pelaporan"
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 2000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            })
+            Toast.fire({
+                icon: 'success',
+                title: 'Data telah ditambah'
+            }).then(res => {
+                getData()
+            })
         } else {
-            alert(`Data Tidak Boleh Kosong atau\nData Uraian:` + a + ` sudah terpenuhi\nSilahkan isi data perkembangan yang lain`)
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 2000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            })
+            Toast.fire({
+                icon: 'error',
+                title: 'Error',
+                text: `Data Tidak Boleh Kosong atau\nData Uraian:` + a + ` sudah terpenuhi\nSilahkan isi data perkembangan yang lain`,
+            })
         }
 
 
@@ -193,7 +224,21 @@ const PelaporanLapangan = () => {
             .then(res => {
                 const statePelaporan = pelaporan.filter(_id => pelaporan._id !== id);
                 setPelaporan(statePelaporan)
-                alert('Data telah dihapus')
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 1000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                })
+                Toast.fire({
+                    icon: 'success',
+                    title: `Data id:` + id + `telah dihapus`
+                })
                 getData()
             })
     }

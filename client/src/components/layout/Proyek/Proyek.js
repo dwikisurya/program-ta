@@ -1,5 +1,6 @@
-import React, { Children, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Navbar from '../Navbar'
+import Swal from 'sweetalert2'
 
 import MaterialTable from "material-table";
 import _ from 'lodash'
@@ -98,12 +99,41 @@ const Proyek = () => {
         e.preventDefault()
         const a = (Object.keys(formdata).length)
         if (a < 5) {
-            alert('Gagal menambah data dengan field kosong')
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 2000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            })
+            Toast.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Harap isi Field yang kosong',
+            })
         } else {
-            console.log(formdata)
             postproyek(formdata)
-            alert('Data berhasil ditambah')
-            window.location = "/proyek"
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 2000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            })
+            Toast.fire({
+                icon: 'success',
+                title: 'Data telah ditambah'
+            }).then(res => {
+                getData()
+            })
         }
     }
 
@@ -113,7 +143,21 @@ const Proyek = () => {
             .then(res => {
                 const stateProyek = proyek.filter(_id => proyek._id !== id);
                 setProyek(stateProyek)
-                alert('Data telah dihapus')
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 2000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                })
+                Toast.fire({
+                    icon: 'success',
+                    title: `Data id:` + id + `telah dihapus`
+                })
                 getData()
             })
     }

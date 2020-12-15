@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
-import Form from 'react-bootstrap/Form'
-import Button from 'react-bootstrap/Button'
+import Swal from 'sweetalert2'
 
 import postlogin from '.././client/login.post'
 
@@ -23,10 +22,42 @@ const SignIn = () => {
             if (result.status === 200) {
                 const { token } = result.data
                 localStorage.setItem('token', token)
-                window.location = '/'
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 1000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                })
+                Toast.fire({
+                    icon: 'success',
+                    title: 'Signed in successfully'
+                }).then(res => {
+                    window.location = '/'
+                })
                 return
             } else {
-                alert('Email/Password Salah')
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                })
+
+                Toast.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Email/Password Salah',
+                })
             }
         } catch (error) {
 

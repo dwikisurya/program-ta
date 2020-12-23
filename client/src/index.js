@@ -10,6 +10,7 @@ import {
 } from "react-router-dom";
 import jwt from 'jsonwebtoken'
 import Login from './components/auth/SignIn'
+import Pagenotfound from './components/layout/pagenotfound'
 
 import Dashboard from './components/layout/Dashboard';
 
@@ -32,6 +33,7 @@ let decode = null
 if (token) {
   decode = jwt.verify(token, process.env.REACT_APP_SECRET)
   localStorage.setItem('role', decode.role)
+  localStorage.setItem('namaUser', decode.namaUser)
 }
 
 function mappingRouting() {
@@ -44,37 +46,39 @@ function mappingRouting() {
         <Route exact path="/sumberdaya/kegiatan"><Kegiatan /></Route>
         <Route exact path="/sumberdaya/kategori"><Kategori /></Route>
         <Route exact path="/laporan/sumberdaya"><LaporanSumberDaya /></Route>
-        <Route path=""><div><h1>Page Not Found</h1></div></Route>
+        <Route path=""><Pagenotfound /></Route>
       </Switch>
 
     case 'pm':
       return <Switch>
         <Route exact path="/"><Dashboard /></Route>
+        <Route exact path="/laporan/proyek"><LaporanProyek /></Route>
         <Route exact path="/proyek/rab"><RAB /></Route>
         <Route exact path="/proyek/scheduling"><Scheduling /></Route>
-        <Route exact path="/laporan/proyek"><LaporanProyek /></Route>
-        <Route path=""><div><h1>Page Not Found</h1></div></Route>
+        <Route path=""><Pagenotfound /></Route>
       </Switch>
 
     case 'mandor':
       return <Switch>
         <Route exact path="/"><Dashboard /></Route>
         <Route exact path="/pelaporan"><PelaporanLapangan /></Route>
-        <Route path=""><div><h1>Page Not Found</h1></div></Route>
+        <Route path=""><Pagenotfound /></Route>
       </Switch>
 
     case 'direktur':
       return <Switch>
         <Route exact path="/"><Dashboard /></Route>
         <Route exact path="/proyek"><Proyek /></Route>
+        <Route exact path="/proyek/rab"><RAB /></Route>
+        <Route exact path="/proyek/scheduling"><Scheduling /></Route>
         <Route exact path="/laporan/sumberdaya"><LaporanSumberDaya /></Route>
         <Route exact path="/laporan/proyek"><LaporanProyek /></Route>
-        <Route path=""><div><h1>Page Not Found</h1></div></Route>
+        <Route path=""><Pagenotfound /></Route>
       </Switch>
 
     default:
       return <Switch>
-        <Route path=""><div><h1>Roles Not Found</h1></div></Route>
+        <Route path=""><Pagenotfound /></Route>
       </Switch>
   }
 }

@@ -71,6 +71,17 @@ const Dashboard = () => {
                 borderWidth: 1,
             },
         ],
+        options: {
+            scales: {
+                yAxes: [
+                    {
+                        ticks: {
+                            beginAtZero: true,
+                        },
+                    },
+                ],
+            },
+        }
     }
 
     // Get Proyek untuk Lokasi / Kota Proyek Chart
@@ -132,6 +143,17 @@ const Dashboard = () => {
                 borderWidth: 1,
             },
         ],
+        options: {
+            scales: {
+                yAxes: [
+                    {
+                        ticks: {
+                            beginAtZero: true,
+                        },
+                    },
+                ],
+            },
+        }
     }
 
     const dataLokasiProyek = {
@@ -161,17 +183,20 @@ const Dashboard = () => {
         ],
     }
 
-    const options = {
+    let options = {
         scales: {
             yAxes: [
                 {
                     ticks: {
                         beginAtZero: true,
+                        stepSize: 1
                     },
                 },
             ],
         },
     }
+
+
 
     //
     // Get
@@ -255,7 +280,7 @@ const Dashboard = () => {
                             <div className="card">
                                 <h5 className="card-header"> Proyek Berjalan </h5>
                                 <div className="card-body">
-                                    <HorizontalBar data={dataProyekBerjalan} />
+                                    <HorizontalBar data={dataProyekBerjalan} options={options} />
                                 </div>
                             </div>
                             <div className="card" style={{ marginTop: 20 }}>

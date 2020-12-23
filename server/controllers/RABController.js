@@ -2,6 +2,7 @@ const rabproyek = require('../models/rabproyek')
 const { json } = require('body-parser')
 const jwt = require('jsonwebtoken')
 const { update } = require('../models/rabproyek')
+const { createInvoice } = require("./ExportLaporan.js")
 
 module.exports = class RABController {
 
@@ -21,7 +22,7 @@ module.exports = class RABController {
             grandTotal: grand,
             updated_at: updated_at,
             created_at: created_at
-            
+
         }).then((result) => {
             res.status(201).json({ msg: 'Data Berhasil Ditambah' })
             console.log(result)
@@ -69,12 +70,14 @@ module.exports = class RABController {
         rabproyek.findById(id)
             .populate({
                 path: 'idProyek',
-                select: 'namaProyek'
+                select: 'namaProyek -_id'
             }).populate({
-                path: 'idKegiatanProyek',
-                select: 'namaKegiatan -_id'
+                path: 'rab.idKegiatanProyek',
+                select: 'namaKegiatan'
             })
             .then((result) => {
+                const hasil = result
+                createInvoice(hasil, `./report/rab_` + hasil._id + `.pdf`)
                 res.status(200).json(result)
             }).catch((err) => {
                 res.status(500).json(err)

@@ -14,7 +14,7 @@ import hitproyek from '../../client/proyek/proyek.get'
 import hitpekerjaan from '../../client/sumberdaya/kegiatanproyek.get'
 
 const RAB = () => {
-
+    const namaUser = localStorage.getItem('namaUser') || null
     // Get
     const [rab, setRab] = useState([])
     const getData = async () => {
@@ -40,12 +40,12 @@ const RAB = () => {
         }
     });
 
-    const huwala = _.flatMap(dataqq, ({ id, namaProyek, rab, status }) =>
-        _.flatMap(rab, ({ uraianPekerjaan, idKegiatanProyek }) => ({ id: id, namaProyek: namaProyek, uraian: uraianPekerjaan, idKegiatanProyek: idKegiatanProyek, status: status }))
+    const huwala = _.flatMap(dataqq, ({ id, namaProyek, rab, status, totalHarga }) =>
+        _.flatMap(rab, ({ uraianPekerjaan, idKegiatanProyek, totalHarga }) => ({ id: id, namaProyek: namaProyek, uraian: uraianPekerjaan, idKegiatanProyek: idKegiatanProyek, status: status, totalHarga: totalHarga }))
     )
 
-    const result = _.flatMap(huwala, ({ id, namaProyek, uraian, idKegiatanProyek, status }) =>
-        _.map(idKegiatanProyek, tag => ({ id, namaProyek, uraian, status, ...tag }))
+    const result = _.flatMap(huwala, ({ id, namaProyek, uraian, idKegiatanProyek, status, totalHarga }) =>
+        _.map(idKegiatanProyek, tag => ({ id, namaProyek, uraian, status, totalHarga, ...tag }))
     );
 
     // Populate Select For Proyek 
@@ -58,12 +58,14 @@ const RAB = () => {
             console.log('Error')
         }
     }
-
+    console.log(dataProyek)
     const renderProyek = () => {
         return dataProyek.map(proyeku => {
-            return (
-                <option key={proyeku._id} value={proyeku._id} name='idProyek' label={proyeku.namaProyek}></option>
-            )
+            if (proyeku.projectManager.namaKaryawan === namaUser) {
+                return (
+                    <option key={proyeku._id} value={proyeku._id} name='idProyek' label={proyeku.namaProyek}></option>
+                )
+            }
         })
     }
 
@@ -110,9 +112,9 @@ const RAB = () => {
             values[index].uraianPekerjaan = event.target.value;
         } if (event.target.name === "idPekerjaan") {
             values[index].idKegiatanProyek = Array.from(event.target.selectedOptions, option => option.value)
-            values[index].hargaKegiatan = Array.from(event.target.selectedOptions, option => parseInt(option.attributes.getNamedItem("data-valuea").value))
+            values[index].hargaKegiatan = Array.from(event.target.selectedOptions, option => parseInt(option.attributes.getNamedItem("data-valuea").value)) || 0
         } if (event.target.name === "volume") {
-            values[index].volume = Array.from(event.target.value.split(','))
+            values[index].volume = Array.from(event.target.value.split(',')) || 0
         }
         i = values[index].hargaKegiatan
         j = values[index].volume
@@ -335,7 +337,7 @@ const RAB = () => {
                                 {
                                     title: "Nama Kegiatan", field: "namaKegiatan",
                                 },
-                                { title: "Nama Kegiatan", field: "status" },
+                                { title: "Total", field: "totalHarga" },
                                 {
                                     title: "Edit",
                                     field: "internal_action",

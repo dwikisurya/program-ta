@@ -4,6 +4,9 @@ import dateFormat from 'dateformat'
 import _, { fromPairs } from 'lodash'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
+import pdfMake from "pdfmake/build/pdfmake";
+import pdfFonts from "pdfmake/build/vfs_fonts";
+
 
 import hitrab from '../../client/proyek/rab.get'
 import hitscheduling from '../../client/proyek/scheduling.get'
@@ -22,11 +25,11 @@ const LaporanProyek = () => {
         }
     }
 
-    var groupsRAB = _.groupBy(rab, function (value) {
+    const groupsRAB = _.groupBy(rab, function (value) {
         return value._id + '#' + value.idProyek.namaProyek;
     });
 
-    var dataRAB = _.map(groupsRAB, function (group) {
+    const dataRAB = _.map(groupsRAB, function (group) {
         return {
             id: group[0]._id,
             namaProyek: group[0].idProyek.namaProyek,
@@ -40,26 +43,15 @@ const LaporanProyek = () => {
         _.flatMap(rab, ({ uraianPekerjaan, idKegiatanProyek, totalHarga, volume, hargaKegiatan }) => ({ id: id, namaProyek: namaProyek, uraian: uraianPekerjaan, idKegiatanProyek: idKegiatanProyek, status: status, totalHarga: totalHarga, volume: volume, hargaKegiatan: hargaKegiatan }))
     )
 
-    var groupsRABQ = _.groupBy(huwalaRABA, function (value) {
+    const groupsRABQ = _.groupBy(huwalaRABA, function (value) {
         return value.id + '#' + value.namaProyek + '#' + value.uraian
     });
-    var dataRABQ = _.map(groupsRABQ, function (group) {
-        return {
-            id: group[0].id,
-            namaProyek: group[0].namaProyek,
-            idKegiatanProyek: group[0].idKegiatanProyek.map(v => Object.values(v).join('_')).join(','),
-            uraian: group[0].uraian,
-            hargaKegiatan: group[0].hargaKegiatan,
-            volume: group[0].volume,
-            totalHarga: group[0].totalHarga
-        }
-    });
 
-    var groupsRABQQ = _.groupBy(huwalaRABA, function (value) {
+    const groupsRABQQ = _.groupBy(huwalaRABA, function (value) {
         return value.namaProyek + '#' + value.uraian
     });
 
-    var dataRABQQ = _.map(groupsRABQQ, function (group) {
+    const dataRABQQ = _.map(groupsRABQQ, function (group) {
         return {
             id: group[0].id,
             namaProyek: group[0].namaProyek,
@@ -70,7 +62,8 @@ const LaporanProyek = () => {
             totalHarga: group[0].totalHarga
         }
     });
-    console.log({ groupsRABQQ, dataRABQQ })
+    console.log(dataRABQQ)
+
 
     // Scheduling
     const [scheduling, setScheduling] = useState([])
@@ -82,11 +75,11 @@ const LaporanProyek = () => {
             console.log('Error')
         }
     }
-    var groupsSCH = _.groupBy(scheduling, function (value) {
+    const groupsSCH = _.groupBy(scheduling, function (value) {
         return value._id + '#' + value.idRabProyek.idProyek.namaProyek;
     });
 
-    var mapSCH = _.map(groupsSCH, function (group) {
+    const mapSCH = _.map(groupsSCH, function (group) {
         return {
             id: group[0]._id,
             namaProyek: group[0].idRabProyek.idProyek.namaProyek,
@@ -99,7 +92,7 @@ const LaporanProyek = () => {
         _.flatMap(sch, ({ uraianPekerjaan, tglKerja, bobotKegiatan, bobotPekerjaan, perkiraanDurasi, created_at }) => ({ id: id, namaProyek: namaProyek, uraian: uraianPekerjaan[0], tglKerja: tglKerja, bobotKegiatan: bobotKegiatan, bobotPekerjaan: bobotPekerjaan, perkiraanDurasi: perkiraanDurasi, created_at: created_at }))
     )
 
-    var laporanSch = _.map(dataSch, function (group) {
+    const laporanSch = _.map(dataSch, function (group) {
         return {
             id: group.id,
             namaProyek: group.namaProyek,
@@ -137,11 +130,11 @@ const LaporanProyek = () => {
             console.log('Error')
         }
     }
-    var groupsPelaporan = _.groupBy(pelaporan, function (value) {
+    const groupsPelaporan = _.groupBy(pelaporan, function (value) {
         return value._id + '#' + value.idSchedulingProyek._id + '#' + value.uraian;
     });
 
-    var laporanPelaporan = _.map(groupsPelaporan, function (group) {
+    const laporanPelaporan = _.map(groupsPelaporan, function (group) {
         return {
             id: group[0]._id,
             idSchedulingProyek: group[0].idSchedulingProyek,
@@ -179,15 +172,17 @@ const LaporanProyek = () => {
             if (rabq.namaProyek === formData.namaProyek) {
                 return (
                     <tr key={rabq.id}>
-                        <td>{rabq.uraian}</td>
+                        <td width="50px">{rabq.uraian}</td>
                         <td> {rabq.idKegiatanProyek.map(nm => {
-                            return <tr colSpan={nm.length}>{nm.namaKegiatan + ','}
-
-                            </tr>
+                            return <tr><td style={{ height: 100 }}>{nm.namaKegiatan}<br></br></td></tr>
                         })}
                         </td>
                         <td> {rabq.volume.map(nb => {
-                            return <tr colSpan={nb.length}>{nb + ','}</tr>
+                            return <tr><td style={{ height: 100 }}>{nb}<br></br></td></tr>
+                        })}
+                        </td>
+                        <td> {rabq.hargaKegiatan.map(nb => {
+                            return <tr><td style={{ height: 100 }}>{nb}<br></br></td></tr>
                         })}
                         </td>
                         <td>{rabq.totalHarga} </td>
@@ -197,10 +192,39 @@ const LaporanProyek = () => {
         })
     }
 
+    // const docDefinition = {
+    //     content: [
+    //         {
+    //             layout: 'lightHorizontalLines', // optional
+    //             table: {
+    //                 headerRows: 1,
+    //                 widths: ['*', 'auto', 100, '*'],
+
+    //                 body: [
+    //                     ['First', 'Second', 'Third', 'The last one'],
+    //                     ['Value 1', 'Value 2', 'Value 3', 'Value 4'],
+    //                 ]
+    //             }
+    //         }
+    //     ]
+    // };
+
     const exportPDFRAB = () => {
-        const doc = new jsPDF()
-        autoTable(doc, {
-            html: '#RAB'
+        const doc = new jsPDF('landscape')
+        var finalY = doc.lastAutoTable.finalY || 10
+
+        doc.text('RAB', 14, finalY + 15)
+        doc.autoTable({
+            startY: finalY + 20,
+            html: '#RAB',
+            useCss: true,
+            columnStyles: {
+                0: { cellWidth: 50 },
+                1: { cellWidth: 80 },
+                2: { cellWidth: 25 },
+                3: { cellWidth: 30 },
+                // etc
+            }
         })
         doc.save('rab.pdf')
     }
@@ -269,9 +293,10 @@ const LaporanProyek = () => {
                         <table className="table table-bordered" id="RAB">
                             <thead>
                                 <tr>
-                                    <th>Uraian Pekerjaan</th>
+                                    <th width="50px">Uraian Pekerjaan</th>
                                     <th>Data Kegiatan</th>
                                     <th>Volume</th>
+                                    <th>Harga Kegiatan</th>
                                     <th>Total Harga</th>
                                 </tr>
                             </thead>

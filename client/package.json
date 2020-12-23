@@ -16,6 +16,7 @@
     "jspdf-autotable": "^3.5.13",
     "lodash": "^4.17.20",
     "material-table": "^1.69.2",
+    "pdfmake": "^0.1.68",
     "react": "^17.0.1",
     "react-addons-update": "^15.6.3",
     "react-bootstrap": "^1.4.0",

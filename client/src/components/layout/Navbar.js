@@ -4,6 +4,7 @@ import Swal from 'sweetalert2'
 
 const Navbar = () => {
     const role = localStorage.getItem('role') || null
+    const namaUser = localStorage.getItem('namaUser') || null
 
     return (
         <div>
@@ -74,7 +75,7 @@ const Navbar = () => {
                             <a className="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 Account </a>
                             <div className="dropdown-menu" aria-labelledby="navbarDropdown">
-                                <a className="nav-link">{`Halo, ` + role}</a>
+                                <a className="nav-link">{`Halo, ` + namaUser}</a>
                                 <a className="nav-link" href="#" onClick={function () {
                                     localStorage.clear()
                                     const Toast = Swal.mixin({

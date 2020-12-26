@@ -2,10 +2,12 @@ require('dotenv').config()
 const express = require('express')
 const mongoose = require('mongoose')
 const { urlencoded, json } = require('express')
+const morgan = require('morgan')
 const router = require('./routers')
 const cors = require('cors')
 const app = express()
 
+app.use(morgan('dev'))
 app.use(cors())
 
 const MONGOOSEURI = `mongodb://localhost/belajarAuth`

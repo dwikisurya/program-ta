@@ -58,7 +58,7 @@ const RAB = () => {
             console.log('Error')
         }
     }
-    console.log(dataProyek)
+
     const renderProyek = () => {
         return dataProyek.map(proyeku => {
             if (proyeku.projectManager.namaKaryawan === namaUser) {
@@ -168,7 +168,7 @@ const RAB = () => {
                 total += formdata[i].totalHarga
             }
 
-            postrab(formdata, idform, total)
+            postrab(formdata, idform, total, namaUser)
             putproyekstatus(idform, updateProyek)
             const Toast = Swal.mixin({
                 toast: true,

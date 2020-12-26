@@ -1,15 +1,17 @@
 import axios from 'axios'
 
-export default async (reqBody, reqbooty, reqbounty) => {
+export default async (reqBody, reqbooty, reqbounty, reqBONTY) => {
 
     const a = JSON.stringify(reqBody)
     const d = JSON.stringify(reqbooty)
     const bounty = JSON.stringify(reqbounty)
+    const i = JSON.stringify(reqBONTY)
 
     const b = `"rab":` + a + "}"
     const c = `{"idProyek":` + d
     const e = `"grandTotal":` + bounty
-    const gabung = c + `,` + e + `,` + b
+    const f = `"posted_by":` + i
+    const gabung = c + `,` + e + `,` + f + `,` + b
 
     console.log(gabung)
     try {
@@ -22,9 +24,6 @@ export default async (reqBody, reqbooty, reqbounty) => {
                 'Content-Type': 'application/json'
             }
         })
-
-        console.log(`Status code: ${res.status}`);
-        console.log(`Status text: ${res.statusText}`);
 
     } catch (error) {
         console.log(error)

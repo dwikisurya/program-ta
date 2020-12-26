@@ -14,6 +14,7 @@ module.exports = class RABController {
         const updated_at = Date.now()
         const status = "Created"
         const created_at = Date.now()
+        const posted_by = req.body.posted_by
 
         rabproyek.create({
             idProyek: idproyek,
@@ -21,8 +22,8 @@ module.exports = class RABController {
             status: status,
             grandTotal: grand,
             updated_at: updated_at,
-            created_at: created_at
-
+            created_at: created_at,
+            posted_by: posted_by,
         }).then((result) => {
             res.status(201).json({ msg: 'Data Berhasil Ditambah' })
             console.log(result)

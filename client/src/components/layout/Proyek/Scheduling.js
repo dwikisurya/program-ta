@@ -11,9 +11,10 @@ import postscheduling from '../../client/proyek/scheduling.post'
 import deletescheduling from '../../client/proyek/scheduling.delete'
 
 import hitrab from '../../client/proyek/rab.get'
+import hitproyek from '../../client/proyek/proyek.get'
 
 const Scheduling = () => {
-
+    const namaUser = localStorage.getItem('namaUser') || null
     // Get Data to Table
     const [scheduling, setScheduling] = useState([])
 
@@ -21,6 +22,18 @@ const Scheduling = () => {
         const schHit = await hitscheduling()
         if (schHit.status = 200) {
             setScheduling(schHit.data)
+        } else {
+            console.log('Error')
+        }
+    }
+
+
+    // Get data Proyek
+    const [dataProyek, setDataProyek] = useState([])
+    const getProyek = async () => {
+        const proyek = await hitproyek()
+        if (proyek.status === 200) {
+            setDataProyek(proyek.data)
         } else {
             console.log('Error')
         }
@@ -70,9 +83,11 @@ const Scheduling = () => {
     // Populate Dropdwon Id RAB Proyek untuk form
     const renderRAB = () => {
         return rab.map(rabq => {
-            return (
-                <option key={rabq._id} value={rabq._id} name='idRAB' label={rabq.idProyek.namaProyek}></option>
-            )
+            if (namaUser === rabq.posted_by) {
+                return (
+                    <option key={rabq._id} value={rabq._id} name='idRAB' label={rabq.idProyek.namaProyek}></option>
+                )
+            }
         })
     }
 
@@ -85,7 +100,6 @@ const Scheduling = () => {
     }
 
     // Form Disini
-
     const [formdata, setFormData] = useState([
         { perkiraanDurasi: '', tglKerja: '', uraianPekerjaan: '', bobotKegiatan: '', bobotPekerjaan: '' }
     ]);
@@ -236,6 +250,7 @@ const Scheduling = () => {
     useEffect(() => {
         getData()
         getRab()
+        getProyek()
     }, [])
 
 

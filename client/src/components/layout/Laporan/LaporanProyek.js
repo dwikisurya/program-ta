@@ -192,23 +192,6 @@ const LaporanProyek = () => {
         })
     }
 
-    // const docDefinition = {
-    //     content: [
-    //         {
-    //             layout: 'lightHorizontalLines', // optional
-    //             table: {
-    //                 headerRows: 1,
-    //                 widths: ['*', 'auto', 100, '*'],
-
-    //                 body: [
-    //                     ['First', 'Second', 'Third', 'The last one'],
-    //                     ['Value 1', 'Value 2', 'Value 3', 'Value 4'],
-    //                 ]
-    //             }
-    //         }
-    //     ]
-    // };
-
     const exportPDFRAB = () => {
         const doc = new jsPDF('landscape')
         var finalY = doc.lastAutoTable.finalY || 10

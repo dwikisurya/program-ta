@@ -24,7 +24,8 @@ const rabSchema = new Schema({
     status: String,
     grandTotal: Number,
     created_at: Date,
-    updated_at: Date
+    updated_at: Date,
+    posted_by: String
 })
 
 const rabproyek = mongoose.model('rabproyek', rabSchema)

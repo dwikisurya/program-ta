@@ -226,18 +226,11 @@ const Dashboard = () => {
 
     const rendertable = () => {
         return dataProyekBelumAcc.map(d1 => {
-            if (d1.status === "Accepted") {
+            if (d1.status != "RAB Accepted") {
                 return (
                     <tr key={d1.id}>
                         <td>{d1.namaProyek}</td>
                         <td>{d1.status}</td>
-                    </tr>
-                )
-            } else {
-                return (
-                    <tr>
-                        <td>--</td>
-                        <td>--</td>
                     </tr>
                 )
             }

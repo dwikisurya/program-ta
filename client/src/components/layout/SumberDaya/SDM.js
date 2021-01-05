@@ -10,6 +10,7 @@ import dateFormat from 'dateformat'
 import hitsdm from '../../client/sumberdaya/sdmanusia.get'
 import postsdm from '../../client/sumberdaya/sdmanusia.post'
 import deletesdm from '../../client/sumberdaya/sdmanusia.delete'
+import postuser from '../../client/sumberdaya/user.post'
 
 const SDM = () => {
 
@@ -70,7 +71,8 @@ const SDM = () => {
                 text: 'Harap isi Field yang kosong',
             })
         } else {
-            postsdm(formdata)
+            // postsdm(formdata)
+            postuser(formdata)
             const Toast = Swal.mixin({
                 toast: true,
                 position: 'top-end',
@@ -142,6 +144,15 @@ const SDM = () => {
                         <div className="form-group">
                             <label for="inp_notelp">No.Telepon</label>
                             <input type="text" className="form-control" name="no_telp" onInput={handlerChange.bind(this)} />
+                        </div>
+                        <div className="form-group">
+                            <label for="inp_status">Status</label>
+                            <select className="form-control" name="status" onInput={handlerChange.bind(this)}>
+                                <option>     </option>
+                                <option value="pm" label="Project Manager"></option>
+                                <option value="mandor" label="Mandor"></option>
+                                <option value="administrasi" label="Administrasi"></option>
+                            </select>
                         </div>
                         <button type="submit" className="btn btn-primary">Submit</button>
                     </form>

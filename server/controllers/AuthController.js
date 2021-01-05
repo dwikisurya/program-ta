@@ -6,7 +6,13 @@ const bcrypt = require('bcryptjs')
 module.exports = class AuthController {
 
     static register(req, res) {
-        const { userName, email, password, role } = req.body
+
+        const userName = req.body.namaKaryawan
+        const role = req.body.status
+        const password1 = userName.replace(/\s+/g, '')
+        const password = password1.toLowerCase() + role
+        const email = password1.toLowerCase() + `.` + role + `@saba.com`
+
         function validateemail(email) {
             const emailRegex = /^[-!#$%&'*+\/0-9=?A-Z^_a-z{|}~](\.?[-!#$%&'*+\/0-9=?A-Z^_a-z`{|}~])*@[a-zA-Z0-9](-*\.?[a-zA-Z0-9])*\.[a-zA-Z](-?[a-zA-Z0-9])+$/
             if (email.match(emailRegex)) {

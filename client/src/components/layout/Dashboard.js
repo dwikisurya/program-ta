@@ -31,7 +31,8 @@ const Dashboard = () => {
             id: group[0]._id,
             namaProyek: group[0].idSchedulingProyek.idRabProyek.idProyek.namaProyek,
             uraian: group[0].uraian,
-            created_at: dateFormat(group[0].created_at, "dd mmm yyyy HH:MM")
+            created_at: dateFormat(group[0].created_at, "dd mmm yyyy HH:MM"),
+            status: group[0].status
         }
     });
 
@@ -275,6 +276,8 @@ const Dashboard = () => {
                                         { title: "Nama Proyek", field: "namaProyek", defaultGroupOrder: 1 },
                                         { title: "Uraian", field: "uraian" },
                                         { title: "Date", field: "created_at", defaultSort: 'desc' },
+                                        { title: "Status", field: "status" },
+
                                     ]}
                                     data={(log)}
                                     options={{

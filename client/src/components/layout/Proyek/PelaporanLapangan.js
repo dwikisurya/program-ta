@@ -1,6 +1,7 @@
 import React, { useState, useEffect, Fragment } from 'react'
 import Navbar from '../Navbar'
 import _ from 'lodash'
+import dateFormat from 'dateformat'
 import MaterialTable from "material-table"
 import Swal from 'sweetalert2'
 
@@ -12,6 +13,7 @@ import hitscheduling from '../../client/proyek/scheduling.get'
 import hitrab from '../../client/proyek/rab.get'
 import hitsdb from '../../client/sumberdaya/sdbarang.get'
 import hitsdm from '../../client/sumberdaya/sdmanusia.get'
+
 
 const PelaporanLapangan = () => {
 
@@ -62,7 +64,8 @@ const PelaporanLapangan = () => {
             count: _.countBy(group, 'uraian'),
             idSDB: group[0].idSDB.map(v => Object.values(v).join('_')).join(','),
             idSDM: group[0].idSDM.map(v => Object.values(v).join('_')).join(','),
-            created_at: group[0].created_at
+            created_at: group[0].created_at,
+            status: group[0].status
         }
     });
 
@@ -127,7 +130,7 @@ const PelaporanLapangan = () => {
 
     // Form Input
     const [formdata, setDataForm] = useState([
-        { idSchedulingProyek: '', uraian: '', idSDM: {}, idSDB: {}, persentase: '' }
+        { idSchedulingProyek: '', uraian: '', idSDM: {}, idSDB: {}, persentase: '', status: '' }
     ])
     const handleInputChange = (index, event) => {
         const values = [...formdata]
@@ -142,8 +145,12 @@ const PelaporanLapangan = () => {
         } if (event.target.name === "idSDB") {
             values[index].idSDB = Array.from(event.target.selectedOptions, option => option.value)
         }
+
+
         setDataForm(values)
     }
+
+
 
     const handleSubmit = e => {
         e.preventDefault();
@@ -160,11 +167,11 @@ const PelaporanLapangan = () => {
                 count: _.countBy(group, 'uraian'),
             }
         });
-        console.log(data)
 
         let a = formdata[0].uraian
         let b = 0
         let c = 0
+
 
         data.map(d1 => {
             if (formdata[0].idSchedulingProyek === d1.idSchedulingProyek._id && formdata[0].uraian === d1.uraian) {
@@ -178,6 +185,69 @@ const PelaporanLapangan = () => {
                     return c = schq.perkiraanDurasi
             })
         })
+
+        // Check Date
+        var groups2 = _.groupBy(scheduling, function (value) {
+            return value._id + '#' + value.idRabProyek.idProyek.namaProyek;
+        });
+
+        var dataqq = _.map(groups2, function (group) {
+            return {
+                id: group[0]._id,
+                namaProyek: group[0].idRabProyek.idProyek.namaProyek,
+                sch: group[0].sch,
+                created_at: dateFormat(group[0].created_at, "dd mmmm yyyy")
+            }
+        });
+
+        const result = _.flatMap(dataqq, ({ id, namaProyek, sch, created_at }) =>
+            _.flatMap(sch, ({ uraianPekerjaan, tglKerja, bobotKegiatan, bobotPekerjaan, perkiraanDurasi, created_at }) => ({ id: id, namaProyek: namaProyek, uraian: uraianPekerjaan[0], tglKerja: tglKerja, bobotKegiatan: bobotKegiatan, bobotPekerjaan: bobotPekerjaan, perkiraanDurasi: perkiraanDurasi, created_at: created_at }))
+        )
+        const resultq = _.map(result, function (group) {
+            return {
+                id: group.id,
+                namaProyek: group.namaProyek,
+                uraian: group.uraian,
+                tglKerja: dateFormat(group.tgl_kerja, "dd/mmmm/yyyy"),
+                perkiraanDurasi: group.perkiraanDurasi,
+                created_at: dateFormat(group.created_at, "dd mmmm yyyy")
+            }
+        })
+
+        const ck_date = resultq.map(rs => {
+            if (rs.id === formdata[0].idSchedulingProyek && rs.uraian === a) {
+                return rs.perkiraanDurasi
+            }
+        })
+
+        const dateStart = resultq.map(rs => {
+            if (rs.id === formdata[0].idSchedulingProyek && rs.uraian === a) {
+                return rs.tglKerja
+            }
+        })
+
+        //Ambil Hari
+        const today = new Date();
+        const date = parseInt(today.getDate())
+
+        // Durasi dan Date Start
+        const ck_durasi = parseInt(ck_date.toString().replace(/,/g, ''))
+        const ck_dateStart = parseInt(dateStart.toString().replace(/,/g, ''))
+        const ck_finalDate = ck_durasi + ck_dateStart
+
+        const date1 = new Date(dateStart);
+        const date2 = today.getDate() + '/' + (today.getMonth() + 1) + '/' + today.getFullYear()
+        const date3 = new Date(date2)
+        const Difference_In_Time = date3.getTime() - date1.getTime();
+        // To calculate the no. of days between two dates 
+        const Difference_In_Days = Difference_In_Time / (1000 * 3600 * 24);
+
+
+        if (Difference_In_Days <= 0) {
+            setDataForm(state => (state[0].status = 'Tepat waktu', state))
+        } else {
+            setDataForm(state => (state[0].status = `Telat ` + Difference_In_Days + ` hari`, state))
+        }
 
         if (b < c) {
             postpelaporan(formdata[0])
@@ -316,6 +386,7 @@ const PelaporanLapangan = () => {
                             { title: "Sumber Daya Digunakan", field: "idSDB" },
                             { title: "Sumber Daya Bekerja", field: "idSDM" },
                             { title: "Persentase", field: "persentase" },
+                            { title: "Status", field: "status" },
                         ]}
                         data={(result)}
                         options={{

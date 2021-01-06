@@ -19,6 +19,7 @@ const perkembanganSchema = new Schema({
         ref: 'sdManusia'
     }],
     created_at: Date,
+    status: String,
 })
 
 const perkembangan = mongoose.model('perkembangan', perkembanganSchema)

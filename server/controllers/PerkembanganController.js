@@ -11,6 +11,7 @@ module.exports = class PerkembanganController {
         const persentase = req.body.persentase
         const idSDB = req.body.idSDB
         const idSDM = req.body.idSDM
+        const status = req.body.status
         const created_at = Date.now()
 
         perkembangan.create({
@@ -19,7 +20,8 @@ module.exports = class PerkembanganController {
             persentase: persentase,
             idSDB: idSDB,
             idSDM: idSDM,
-            created_at: created_at
+            created_at: created_at,
+            status: status
         })
             .then((result) => {
                 res.status(201).json({ msg: 'Data Berhasil Ditambah' })
@@ -115,5 +117,6 @@ module.exports = class PerkembanganController {
                 res.status(500).json(err)
             })
     }
+
 
 }

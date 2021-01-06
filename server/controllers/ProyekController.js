@@ -59,7 +59,7 @@ module.exports = class ProyekController {
 
     static updateStatus(req, res) {
         const id = req.params.id
-        const statusProyek = req.body.statusProyek
+        const statusProyek = req.body.status
         const updated_at = Date.now()
 
         const dataupdate = {

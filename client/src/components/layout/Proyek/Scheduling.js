@@ -83,7 +83,7 @@ const Scheduling = () => {
     // Populate Dropdwon Id RAB Proyek untuk form
     const renderRAB = () => {
         return rab.map(rabq => {
-            if (namaUser === rabq.posted_by) {
+            if (namaUser === rabq.posted_by && rabq.status === "RAB Accepted") {
                 return (
                     <option key={rabq._id} value={rabq._id} name='idRAB' label={rabq.idProyek.namaProyek}></option>
                 )

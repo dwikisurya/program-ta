@@ -12,7 +12,7 @@ import { HorizontalBar, Bar } from 'react-chartjs-2'
 
 
 const Dashboard = () => {
-
+    const role = localStorage.getItem('role') || null
     // Get Pelaporan, untuk chart Proyek Berjalan
     const [pelaporan, setPelaporan] = useState([])
     const getPelaporan = async () => {
@@ -23,10 +23,10 @@ const Dashboard = () => {
             console.log('Error')
         }
     }
-    var g1 = _.groupBy(pelaporan, function (value) {
+    const g1 = _.groupBy(pelaporan, function (value) {
         return value._id + '*' + value.idSchedulingProyek._id;
     });
-    var log = _.map(g1, function (group) {
+    const log = _.map(g1, function (group) {
         return {
             id: group[0]._id,
             namaProyek: group[0].idSchedulingProyek.idRabProyek.idProyek.namaProyek,
@@ -35,16 +35,30 @@ const Dashboard = () => {
         }
     });
 
-    var groupPelaporan = _.groupBy(pelaporan, function (value) {
+    const groupPelaporan = _.groupBy(pelaporan, function (value) {
         return value.idSchedulingProyek.idRabProyek.idProyek.namaProyek;
     });
 
-    var resultPelaporan = _.map(groupPelaporan, function (group) {
+    const resultPelaporan = _.map(groupPelaporan, function (group) {
         return {
             namaProyek: group[0].idSchedulingProyek.idRabProyek.idProyek.namaProyek,
-            total: _.sumBy(group, x => x.persentase).toFixed(2),
+            total: _.sumBy(group, x => x.persentase).toFixed(2), //returns object
+            created_at: dateFormat(group[0].created_at, "yyyy")
         }
     });
+
+    const groupPerYear = _.groupBy(resultPelaporan, function (value) {
+        return value.created_at
+    });
+
+    const resultPerYear = _.map(groupPerYear, function (group) {
+        return {
+            namaProyek: group[0].namaProyek,
+            total: group[0].total,
+            tahun: group[0].created_at
+        }
+    });
+
 
     const dataProyekBerjalan = {
         labels: resultPelaporan.map(m => m.namaProyek),
@@ -96,22 +110,22 @@ const Dashboard = () => {
         }
     }
 
-    var groupProyekTotal = _.groupBy(proyek, function (value) {
+    const groupProyekTotal = _.groupBy(proyek, function (value) {
         return value.kategoriProyek.namaKategori + '*' + value.lokasiProyek;
     });
 
-    var resultProyekTotal = _.map(groupProyekTotal, function (group) {
+    const resultProyekTotal = _.map(groupProyekTotal, function (group) {
         return {
             proyek: group[0].kategoriProyek.namaKategori,
             totalCount: _.countBy(group, Math.floor),
         }
     });
 
-    var groupProyekLokasi = _.groupBy(proyek, function (value) {
+    const groupProyekLokasi = _.groupBy(proyek, function (value) {
         return value.lokasiProyek;
     });
 
-    var resultProyekLokasi = _.map(groupProyekLokasi, function (group) {
+    const resultProyekLokasi = _.map(groupProyekLokasi, function (group) {
         return {
             lokasi: group[0].lokasiProyek,
             totalCount: _.countBy(group, Math.floor),
@@ -211,12 +225,12 @@ const Dashboard = () => {
     }
 
     // To show data to datatable
-    var groupsProyekBelumAcc = _.groupBy(proyek, function (value) {
+    const groupsProyekBelumAcc = _.groupBy(proyek, function (value) {
         return value._id + '#' + value.namaProyek;
     });
 
 
-    var dataProyekBelumAcc = _.map(groupsProyekBelumAcc, function (group) {
+    const dataProyekBelumAcc = _.map(groupsProyekBelumAcc, function (group) {
         return {
             id: group[0]._id,
             namaProyek: group[0].namaProyek,
@@ -246,74 +260,93 @@ const Dashboard = () => {
     return (
         <div className="container-fluid">
             <Navbar />
-            <div className="row" style={{ margin: 10 }}>
-                <div className="col-md-12">
-                    <div className="row">
-                        <div className="col-md-4">
-                            <MaterialTable
-                                title="Log"
-                                columns={[
-                                    { title: "ID", field: "id", hidden: true },
-                                    { title: "Nama Proyek", field: "namaProyek" },
-                                    { title: "Uraian", field: "uraian" },
-                                    { title: "Date", field: "created_at", defaultSort: 'desc' },
-                                ]}
-                                data={(log)}
-                                options={{
-                                    paging: true,
-                                    pageSize: 5,
-                                    search: false
-                                }}
-                            />
-                        </div>
-
-
-                        <div className="col-md-4">
-
-                            <div className="card">
-                                <h5 className="card-header"> Proyek Berjalan </h5>
-                                <div className="card-body">
-                                    <HorizontalBar data={dataProyekBerjalan} options={options} />
-                                </div>
-                            </div>
-                            <div className="card" style={{ marginTop: 20 }}>
-                                <h5 className="card-header"> Proyek Belum Berjalan </h5>
-                                <div className="card-body">
-                                    <table className="table">
-                                        <thead>
-                                            <tr>
-                                                <th>Nama Proyek</th>
-                                                <th>Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {rendertable()}
-                                        </tbody>
-                                    </table>
-                                </div>
+            {
+                (
+                    role === "direktur")
+                &&
+                <div className="row" style={{ margin: 10 }}>
+                    <div className="col-md-12">
+                        <div className="row">
+                            <div className="col-md-4">
+                                <MaterialTable
+                                    title="Log"
+                                    columns={[
+                                        { title: "ID", field: "id", hidden: true },
+                                        { title: "Nama Proyek", field: "namaProyek", defaultGroupOrder: 1 },
+                                        { title: "Uraian", field: "uraian" },
+                                        { title: "Date", field: "created_at", defaultSort: 'desc' },
+                                    ]}
+                                    data={(log)}
+                                    options={{
+                                        grouping: true,
+                                        paging: true,
+                                        pageSize: 5,
+                                        search: false
+                                    }}
+                                />
                             </div>
 
-                        </div>
 
-                        <div className="col-md-4">
-                            <div className="card bg-default">
-                                <h5 className="card-header">Lokasi</h5>
-                                <div className="card-body">
-                                    <Bar data={dataLokasiProyek} options={options} />
+                            <div className="col-md-4">
+
+                                <div className="card">
+                                    <h5 className="card-header"> Proyek Berjalan </h5>
+                                    <div className="card-body">
+                                        <HorizontalBar data={dataProyekBerjalan} options={options} />
+                                    </div>
                                 </div>
+                                <div className="card" style={{ marginTop: 20 }}>
+                                    <h5 className="card-header"> Proyek Belum Berjalan </h5>
+                                    <div className="card-body">
+                                        <table className="table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Nama Proyek</th>
+                                                    <th>Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {rendertable()}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
                             </div>
 
-                            <div className="card" style={{ marginTop: 20 }}>
-                                <h5 className="card-header">Jenis Proyek Dikerjakan</h5>
-                                <div className="card-body">
-                                    <Bar data={dataTotalProyek} options={options} />
+                            <div className="col-md-4">
+                                <div className="card bg-default">
+                                    <h5 className="card-header">Lokasi</h5>
+                                    <div className="card-body">
+                                        <Bar data={dataLokasiProyek} options={options} />
+                                    </div>
                                 </div>
-                            </div>
 
+
+                                <div className="card-body">
+                                    <MaterialTable
+                                        title="Penyelesaian Proyek/ Tahun"
+                                        columns={[
+                                            { title: "Tahun", field: "tahun", defaultGroupOrder: 1, defaultSort: 'desc' },
+                                            { title: "Nama Proyek", field: "namaProyek" },
+                                            { title: "Persentase", field: "total" },
+                                        ]}
+                                        data={(resultPerYear)}
+                                        options={{
+                                            grouping: true,
+                                            paging: true,
+                                            pageSize: 5,
+                                            search: false
+                                        }}
+                                    />
+                                </div>
+
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            }
+
         </div >
     )
 }

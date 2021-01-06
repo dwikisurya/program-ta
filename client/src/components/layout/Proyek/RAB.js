@@ -9,12 +9,14 @@ import hitrab from '../../client/proyek/rab.get'
 import deleterab from '../../client/proyek/rab.delete'
 import postrab from '../../client/proyek/rab.post'
 
+import putrabstatus from '../../client/proyek/rab.status.put'
 import putproyekstatus from '../../client/proyek/proyek.status.put'
 import hitproyek from '../../client/proyek/proyek.get'
 import hitpekerjaan from '../../client/sumberdaya/kegiatanproyek.get'
 
 const RAB = () => {
     const namaUser = localStorage.getItem('namaUser') || null
+    const role = localStorage.getItem('role') || null
     // Get
     const [rab, setRab] = useState([])
     const getData = async () => {
@@ -34,20 +36,21 @@ const RAB = () => {
     var dataqq = _.map(groups1, function (group) {
         return {
             id: group[0]._id,
+            idProyek: group[0].idProyek._id,
             namaProyek: group[0].idProyek.namaProyek,
             rab: group[0].rab,
             status: group[0].status
         }
     });
 
-    const huwala = _.flatMap(dataqq, ({ id, namaProyek, rab, status, totalHarga }) =>
-        _.flatMap(rab, ({ uraianPekerjaan, idKegiatanProyek, totalHarga }) => ({ id: id, namaProyek: namaProyek, uraian: uraianPekerjaan, idKegiatanProyek: idKegiatanProyek, status: status, totalHarga: totalHarga }))
+    const huwala = _.flatMap(dataqq, ({ id, idProyek, namaProyek, rab, status, totalHarga }) =>
+        _.flatMap(rab, ({ uraianPekerjaan, idKegiatanProyek, totalHarga }) => ({ id: id, idProyek: idProyek, namaProyek: namaProyek, uraian: uraianPekerjaan, idKegiatanProyek: idKegiatanProyek, status: status, totalHarga: totalHarga }))
     )
 
-    const result = _.flatMap(huwala, ({ id, namaProyek, uraian, idKegiatanProyek, status, totalHarga }) =>
-        _.map(idKegiatanProyek, tag => ({ id, namaProyek, uraian, status, totalHarga, ...tag }))
+    const result = _.flatMap(huwala, ({ id, idProyek, namaProyek, uraian, idKegiatanProyek, status, totalHarga }) =>
+        _.map(idKegiatanProyek, tag => ({ id, idProyek, namaProyek, uraian, status, totalHarga, ...tag }))
     );
-
+    console.log({ dataqq, huwala, result })
     // Populate Select For Proyek 
     const [dataProyek, setDataProyek] = useState([])
     const getProyek = async () => {
@@ -94,8 +97,11 @@ const RAB = () => {
     ]);
 
     const [updateProyek, setUpdateDataProyek] = useState({
-        statusProyek: 'RAB Accepted'
+        status: 'RAB Accepted'
     })
+
+    const [updateRAB, setStatusRAB] = useState({ status: 'RAB Accepted' })
+
     const [formproyek, setFormProyek] = useState([])
     const handlerChange = (e) => {
         setFormProyek(formdata => ({ ...formdata, [e.target.name]: e.target.value }))
@@ -167,9 +173,8 @@ const RAB = () => {
             for (let i = 0; i < formdata.length; i++) {
                 total += formdata[i].totalHarga
             }
-
             postrab(formdata, idform, total, namaUser)
-            putproyekstatus(idform, updateProyek)
+            console.log(idform)
             const Toast = Swal.mixin({
                 toast: true,
                 position: 'top-end',
@@ -219,6 +224,48 @@ const RAB = () => {
         setFormData(values);
     };
 
+    // Update Status Proyek
+    const updateStatus = (e, id, idproyek) => {
+        if (role === 'direktur') {
+            putrabstatus(id, updateRAB)
+                .then(res => {
+                    const Toast = Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 1000,
+                        timerProgressBar: true,
+                        didOpen: (toast) => {
+                            toast.addEventListener('mouseenter', Swal.stopTimer)
+                            toast.addEventListener('mouseleave', Swal.resumeTimer)
+                        }
+                    })
+                    Toast.fire({
+                        icon: 'success',
+                        title: `RAB id:` + id + `berhasil di accept!`
+                    })
+                    putproyekstatus(idproyek, updateProyek)
+                    window.location = '/proyek/rab'
+                })
+
+        } else {
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 1000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            })
+            Toast.fire({
+                icon: 'error',
+                title: `Tidak bisa melakukan aksi karena role bukan semestinya.`
+            })
+        }
+    }
 
     // Delete
     const deleteRow = (id, e) => {
@@ -332,6 +379,7 @@ const RAB = () => {
                             title="Data RAB"
                             columns={[
                                 { title: "ID", field: "id", hidden: true },
+                                { title: "ID Proyek", field: "idProyek", hidden: true },
                                 { title: "Nama Proyek", field: "namaProyek", defaultGroupOrder: 0 },
                                 { title: "Uraian", field: "uraian", defaultGroupOrder: 0 },
                                 {
@@ -347,7 +395,7 @@ const RAB = () => {
                                         rowData && (
                                             <td><ModalRAB rowData={rowData} /></td>
                                         )
-                                },
+                                }
                             ]}
                             data={(result)}
                             options={{
@@ -358,12 +406,18 @@ const RAB = () => {
                                     icon: 'delete',
                                     tooltip: 'Delete Data',
                                     onClick: (e, rowData) => deleteRow(rowData.id, e)
+                                },
+
+                                {
+
+                                    icon: 'check',
+                                    tooltip: 'Accept RAB',
+                                    onClick: (e, rowData) => updateStatus(e, rowData.id, rowData.idProyek)
                                 }
                             ]}
                             options={{
                                 actionsColumnIndex: -1
                             }}
-
                         />
                     </div>
                 </div>

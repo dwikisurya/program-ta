@@ -19,7 +19,7 @@ const PelaporanLapangan = () => {
     const [pelaporan, setPelaporan] = useState([])
     const getData = async () => {
         const pelaporanHit = await hitpelaporan()
-        if (pelaporanHit.status = 200) {
+        if (pelaporanHit.status === 200) {
             setPelaporan(pelaporanHit.data)
         } else {
             console.log('Error')
@@ -30,7 +30,7 @@ const PelaporanLapangan = () => {
     const [scheduling, setScheduling] = useState([])
     const getScheduling = async () => {
         const schHit = await hitscheduling()
-        if (schHit.status = 200) {
+        if (schHit.status === 200) {
             setScheduling(schHit.data)
         } else {
             console.log('Error')
@@ -39,7 +39,7 @@ const PelaporanLapangan = () => {
     const [rab, setRab] = useState([])
     const getRab = async () => {
         const rabhit = await hitrab()
-        if (rabhit.status = 200) {
+        if (rabhit.status === 200) {
             setRab(rabhit.data)
         } else {
             console.log('Error')

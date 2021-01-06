@@ -144,11 +144,13 @@ const LaporanProyek = () => {
             total: _.sumBy(group, x => x.persentase).toFixed(2),
             idSDB: group[0].idSDB,
             idSDM: group[0].idSDM,
+            tgl: dateFormat(group[0].created_at, "dd mmmm yyyy")
         }
     });
 
     const rendertablePelaporan = () => {
         return laporanPelaporan.map(lp1 => {
+            console.log(laporanPelaporan)
             if (lp1.namaProyek === formData.namaProyek) {
                 return (
                     <tr key={lp1.id}>
@@ -161,6 +163,7 @@ const LaporanProyek = () => {
                             return <tr colSpan={nm.length}>{nm.namaKaryawan + ','}</tr>
                         })}
                         </td>
+                        <td>{lp1.tgl}</td>
 
                     </tr>
                 )
@@ -194,9 +197,18 @@ const LaporanProyek = () => {
 
     const exportPDFRAB = () => {
         const doc = new jsPDF('landscape')
-        var finalY = doc.lastAutoTable.finalY || 10
+        const finalY = doc.lastAutoTable.finalY || 10
+        const namaProyek = `RAB Proyek: ` + formData.namaProyek
 
-        doc.text('RAB', 14, finalY + 15)
+        const today = new Date();
+        const date = today.getDate() + '-' + (today.getMonth() + 1) + '-' + today.getFullYear()
+        const time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds()
+        const dateTime = 'Tanggal: ' + date + ' ' + time
+
+        doc.text('PT.Saba Pratama Surabaya', 14, finalY)
+        doc.text(namaProyek, 14, finalY + 15)
+        doc.text(dateTime, 215, finalY + 15)
+
         doc.autoTable({
             startY: finalY + 20,
             html: '#RAB',
@@ -213,15 +225,43 @@ const LaporanProyek = () => {
     }
     const exportPDFSCHEDULING = () => {
         const doc = new jsPDF()
-        autoTable(doc, {
-            html: '#SCheduling'
+        const finalY = doc.lastAutoTable.finalY || 10
+        const namaProyek = `Scheduling Proyek: ` + formData.namaProyek
+
+        const today = new Date();
+        const date = today.getDate() + '-' + (today.getMonth() + 1) + '-' + today.getFullYear()
+        const time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds()
+        const dateTime = 'Tanggal: ' + date + ' ' + time
+
+        doc.text('PT.Saba Pratama Surabaya', 14, finalY)
+        doc.text(namaProyek, 14, finalY + 15)
+        doc.text(dateTime, 140, finalY)
+
+        doc.autoTable({
+            startY: finalY + 20,
+            html: '#Scheduling',
+            useCss: true,
         })
         doc.save('scheduling.pdf')
     }
     const exportPDFPELAPORAN = () => {
         const doc = new jsPDF()
-        autoTable(doc, {
-            html: '#Pelaporan'
+        const finalY = doc.lastAutoTable.finalY || 10
+        const namaProyek = `Perkembangan Proyek: ` + formData.namaProyek
+
+        const today = new Date();
+        const date = today.getDate() + '-' + (today.getMonth() + 1) + '-' + today.getFullYear()
+        const time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds()
+        const dateTime = 'Tanggal: ' + date + ' ' + time
+
+        doc.text('PT.Saba Pratama Surabaya', 14, finalY)
+        doc.text(namaProyek, 14, finalY + 15)
+        doc.text(dateTime, 140, finalY)
+
+        doc.autoTable({
+            startY: finalY + 20,
+            html: '#Pelaporan',
+            useCss: true,
         })
         doc.save('pelaporan.pdf')
     }
@@ -312,6 +352,7 @@ const LaporanProyek = () => {
                                     <th>Uraian Pekerjaan</th>
                                     <th>SDB Digunakan</th>
                                     <th>SDM Bekerja</th>
+                                    <th>Tanggal Penyelesaian</th>
                                 </tr>
                             </thead>
                             <tbody>{rendertablePelaporan()}</tbody>

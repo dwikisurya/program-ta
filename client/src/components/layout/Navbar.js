@@ -32,6 +32,7 @@ const Navbar = () => {
                             (role === "pm" ||
                                 role === "direktur")
                             &&
+                            
                             <li className="nav-item dropdown">
                                 <a className="nav-link dropdown-toggle" href="#" id="navbarDropdown2" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     Proyek</a>

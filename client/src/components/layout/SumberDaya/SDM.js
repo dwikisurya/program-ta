@@ -71,7 +71,7 @@ const SDM = () => {
                 text: 'Harap isi Field yang kosong',
             })
         } else {
-            // postsdm(formdata)
+            postsdm(formdata)
             postuser(formdata)
             const Toast = Swal.mixin({
                 toast: true,
@@ -135,7 +135,11 @@ const SDM = () => {
                         </div>
                         <div className="form-group">
                             <label for="inp_jk">Jenis Kelamin</label>
-                            <input type="text" className="form-control" name="jk" onInput={handlerChange.bind(this)} />
+                            <select className="form-control" name="jk" onInput={handlerChange.bind(this)}>
+                                <option>     </option>
+                                <option value="Pria" label="Pria"></option>
+                                <option value="Wanita" label="Wanita"></option>
+                            </select>
                         </div>
                         <div className="form-group">
                             <label for="inp_alamat">Alamat</label>

@@ -12,6 +12,7 @@ module.exports = class PerkembanganController {
         const idSDB = req.body.idSDB
         const idSDM = req.body.idSDM
         const status = req.body.status
+        const keterangan = req.body.keteranganTambahan
         const created_at = Date.now()
 
         perkembangan.create({
@@ -21,7 +22,8 @@ module.exports = class PerkembanganController {
             idSDB: idSDB,
             idSDM: idSDM,
             created_at: created_at,
-            status: status
+            status: status,
+            keterangan: keterangan
         })
             .then((result) => {
                 res.status(201).json({ msg: 'Data Berhasil Ditambah' })

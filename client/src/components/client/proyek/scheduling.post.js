@@ -1,16 +1,18 @@
 import axios from 'axios'
 
-export default async (reqBody, reqbooty) => {
+export default async (reqBody, reqbooty, reqBounty) => {
 
     const body = JSON.stringify(reqBody)
     const booty = JSON.stringify(reqbooty)
+    const bounty = JSON.stringify(reqBounty)
 
     const a = `{"idRabProyek":` + booty
     const b = `"sch":` + body + "}"
+    const c = `"idMandor":` + bounty
 
-    const gabung = a + `,` + b
+    const gabung = a + `,` + c + `,` + b
     console.log(gabung)
-    
+
     try {
         let res = await axios({
             method: 'post',

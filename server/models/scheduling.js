@@ -6,6 +6,10 @@ const schedulingSchema = new Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'rabproyek'
     },
+    idMandor: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'sdManusia'
+    },
     sch: [{
         perkiraanDurasi: {
             type: Number,

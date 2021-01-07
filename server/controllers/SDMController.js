@@ -11,6 +11,7 @@ module.exports = class SDMController {
         const jk = req.body.jk
         const alamat = req.body.alamat
         const no_telp = req.body.no_telp
+        const status = req.body.status
 
         sdManusia.create({
             namaKaryawan: namaKaryawan,
@@ -18,6 +19,7 @@ module.exports = class SDMController {
             jk: jk,
             alamat: alamat,
             no_telp: no_telp,
+            status: status,
         }).then((result) => {
             res.status(201).json(result)
             console.log(result)
@@ -48,7 +50,8 @@ module.exports = class SDMController {
             tgl_lahir: req.body.tgl_lahir,
             jk: req.body.jk,
             alamat: req.body.alamat,
-            no_telp: req.body.no_telp
+            no_telp: req.body.no_telp,
+            status: req.body.status
         }
 
 

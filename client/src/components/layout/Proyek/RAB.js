@@ -233,7 +233,7 @@ const RAB = () => {
                         toast: true,
                         position: 'top-end',
                         showConfirmButton: false,
-                        timer: 1000,
+                        timer: 3000,
                         timerProgressBar: true,
                         didOpen: (toast) => {
                             toast.addEventListener('mouseenter', Swal.stopTimer)
@@ -242,10 +242,10 @@ const RAB = () => {
                     })
                     Toast.fire({
                         icon: 'success',
-                        title: `RAB id:` + id + `berhasil di accept!`
+                        title: `RAB id: ` + id + `berhasil di accept!`
                     })
                     putproyekstatus(idproyek, updateProyek)
-                    window.location = '/proyek/rab'
+                    // window.location = '/proyek/rab'
                 })
 
         } else {

@@ -16,7 +16,7 @@ import hitsdm from '../../client/sumberdaya/sdmanusia.get'
 
 
 const PelaporanLapangan = () => {
-
+    const namaUser = localStorage.getItem('namaUser') || null
     // Get Data to Table
     const [pelaporan, setPelaporan] = useState([])
     const getData = async () => {
@@ -65,7 +65,8 @@ const PelaporanLapangan = () => {
             idSDB: group[0].idSDB.map(v => Object.values(v).join('_')).join(','),
             idSDM: group[0].idSDM.map(v => Object.values(v).join('_')).join(','),
             created_at: group[0].created_at,
-            status: group[0].status
+            status: group[0].status,
+            keterangan: group[0].keterangan
         }
     });
 
@@ -122,15 +123,17 @@ const PelaporanLapangan = () => {
 
     const renderScheduling = () => {
         return scheduling.map(sch => {
-            return (
-                <option key={sch._id} value={sch._id} name='idSchedulingProyek' label={sch.idRabProyek.idProyek.namaProyek}></option>
-            )
+            if (sch.idMandor.namaKaryawan === namaUser) {
+                return (
+                    <option key={sch._id} value={sch._id} name='idSchedulingProyek' label={sch.idRabProyek.idProyek.namaProyek}></option>
+                )
+            }
         })
     }
 
     // Form Input
     const [formdata, setDataForm] = useState([
-        { idSchedulingProyek: '', uraian: '', idSDM: {}, idSDB: {}, persentase: '', status: '' }
+        { idSchedulingProyek: '', uraian: '', idSDM: {}, idSDB: {}, persentase: '', status: '', keteranganTambahan: 'Tidak ada keterangan tambahan' }
     ])
     const handleInputChange = (index, event) => {
         const values = [...formdata]
@@ -145,12 +148,12 @@ const PelaporanLapangan = () => {
         } if (event.target.name === "idSDB") {
             values[index].idSDB = Array.from(event.target.selectedOptions, option => option.value)
         }
-
+        if (event.target.name === "keteranganTambahan") {
+            values[index].keteranganTambahan = event.target.value;
+        }
 
         setDataForm(values)
     }
-
-
 
     const handleSubmit = e => {
         e.preventDefault();
@@ -196,24 +199,22 @@ const PelaporanLapangan = () => {
                 id: group[0]._id,
                 namaProyek: group[0].idRabProyek.idProyek.namaProyek,
                 sch: group[0].sch,
-                created_at: dateFormat(group[0].created_at, "dd mmmm yyyy")
             }
         });
 
-        const result = _.flatMap(dataqq, ({ id, namaProyek, sch, created_at }) =>
-            _.flatMap(sch, ({ uraianPekerjaan, tglKerja, bobotKegiatan, bobotPekerjaan, perkiraanDurasi, created_at }) => ({ id: id, namaProyek: namaProyek, uraian: uraianPekerjaan[0], tglKerja: tglKerja, bobotKegiatan: bobotKegiatan, bobotPekerjaan: bobotPekerjaan, perkiraanDurasi: perkiraanDurasi, created_at: created_at }))
+        const result = _.flatMap(dataqq, ({ id, namaProyek, sch }) =>
+            _.flatMap(sch, ({ uraianPekerjaan, tglKerja, bobotKegiatan, bobotPekerjaan, perkiraanDurasi, created_at }) => ({ id: id, namaProyek: namaProyek, uraian: uraianPekerjaan[0], tglKerja: tglKerja, bobotKegiatan: bobotKegiatan, bobotPekerjaan: bobotPekerjaan, perkiraanDurasi: perkiraanDurasi }))
         )
         const resultq = _.map(result, function (group) {
             return {
                 id: group.id,
                 namaProyek: group.namaProyek,
                 uraian: group.uraian,
-                tglKerja: dateFormat(group.tgl_kerja, "dd/mmmm/yyyy"),
+                tglKerja: dateFormat(group.tglKerja, "yyyy-mm-dd"),
                 perkiraanDurasi: group.perkiraanDurasi,
-                created_at: dateFormat(group.created_at, "dd mmmm yyyy")
             }
         })
-
+        console.log({ resultq, result })
         const ck_date = resultq.map(rs => {
             if (rs.id === formdata[0].idSchedulingProyek && rs.uraian === a) {
                 return rs.perkiraanDurasi
@@ -228,25 +229,17 @@ const PelaporanLapangan = () => {
 
         //Ambil Hari
         const today = new Date();
-        const date = parseInt(today.getDate())
-
         // Durasi dan Date Start
-        const ck_durasi = parseInt(ck_date.toString().replace(/,/g, ''))
-        const ck_dateStart = parseInt(dateStart.toString().replace(/,/g, ''))
-        const ck_finalDate = ck_durasi + ck_dateStart
-
+        const ck_durasi = parseInt(ck_date.toString().replace(/,/g, '')) * (1000 * 3600 * 24)
         const date1 = new Date(dateStart);
-        const date2 = today.getDate() + '/' + (today.getMonth() + 1) + '/' + today.getFullYear()
-        const date3 = new Date(date2)
-        const Difference_In_Time = date3.getTime() - date1.getTime();
+        const Difference_In_Time = today.getTime() - (date1.getTime() + ck_durasi)
         // To calculate the no. of days between two dates 
         const Difference_In_Days = Difference_In_Time / (1000 * 3600 * 24);
-
 
         if (Difference_In_Days <= 0) {
             setDataForm(state => (state[0].status = 'Tepat waktu', state))
         } else {
-            setDataForm(state => (state[0].status = `Telat ` + Difference_In_Days + ` hari`, state))
+            setDataForm(state => (state[0].status = `Telat ` + Difference_In_Days.toFixed(0) + ` hari`, state))
         }
 
         if (b < c) {
@@ -361,6 +354,17 @@ const PelaporanLapangan = () => {
                                             {renderSDB()}
                                         </select>
                                     </div>
+                                    <div className="form-group col-md-12">
+                                        <label htmlFor="uraian">Keterangan</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            id="keteranganTambahana"
+                                            name="keteranganTambahan"
+                                            placeholder="Kosongi jika tidak ada keterangan tambahan"
+                                            onChange={event => handleInputChange(index, event)}
+                                        />
+                                    </div>
                                 </Fragment>
                             ))}
                         </div>
@@ -387,6 +391,7 @@ const PelaporanLapangan = () => {
                             { title: "Sumber Daya Bekerja", field: "idSDM" },
                             { title: "Persentase", field: "persentase" },
                             { title: "Status", field: "status" },
+                            { title: "Keterangan", field: "keterangan" },
                         ]}
                         data={(result)}
                         options={{

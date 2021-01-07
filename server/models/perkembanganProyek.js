@@ -20,6 +20,7 @@ const perkembanganSchema = new Schema({
     }],
     created_at: Date,
     status: String,
+    keterangan: String,
 })
 
 const perkembangan = mongoose.model('perkembangan', perkembanganSchema)

@@ -12,6 +12,7 @@ import deletescheduling from '../../client/proyek/scheduling.delete'
 
 import hitrab from '../../client/proyek/rab.get'
 import hitproyek from '../../client/proyek/proyek.get'
+import hitsdm from '../../client/sumberdaya/sdmanusia.get'
 
 const Scheduling = () => {
     const namaUser = localStorage.getItem('namaUser') || null
@@ -50,6 +51,18 @@ const Scheduling = () => {
             console.log('Error')
         }
     }
+
+    // Get Data SDM
+    const getSDM = async () => {
+        const sdm = await hitsdm()
+        if (sdm.status === 200) {
+            setsdmData(sdm.data)
+        } else {
+            console.log(sdm)
+        }
+    }
+
+    const [sdmData, setsdmData] = useState([])
     // To show data to datatable
     var groups1 = _.groupBy(scheduling, function (value) {
         return value._id + '#' + value.idRabProyek.idProyek.namaProyek;
@@ -88,6 +101,18 @@ const Scheduling = () => {
                     <option key={rabq._id} value={rabq._id} name='idRAB' label={rabq.idProyek.namaProyek}></option>
                 )
             }
+        })
+    }
+
+    // Populate Dropdwon Id Mandor untuk form
+    const renderMANDOR = () => {
+        return sdmData.map(sdmq => {
+            if (sdmq.status === 'mandor') {
+                return (
+                    <option key={sdmq._id} value={sdmq._id} name='idMandor' label={sdmq.namaKaryawan}></option>
+                )
+            }
+
         })
     }
 
@@ -182,8 +207,9 @@ const Scheduling = () => {
 
         if (c < 1 || c === undefined) {
             const idRAB = formRAB.idRabProyek
-            postscheduling(formdata, idRAB)
-            putrabstatus(idRAB, statusRAB)
+            const idMandor = formRAB.mandorProyek
+            postscheduling(formdata, idRAB, idMandor)
+
             const Toast = Swal.mixin({
                 toast: true,
                 position: 'top-end',
@@ -251,6 +277,7 @@ const Scheduling = () => {
         getData()
         getRab()
         getProyek()
+        getSDM()
     }, [])
 
 
@@ -267,6 +294,11 @@ const Scheduling = () => {
                                 <select className="form-control" id="idRabProyek" name="idRabProyek" onChange={handlerChange}>
                                     <option value="">     </option>
                                     {renderRAB()}
+                                </select>
+                                <label htmlFor="idProyek">Mandor Proyek</label>
+                                <select className="form-control" id="mandorProyek" name="mandorProyek" onChange={handlerChange}>
+                                    <option value="">     </option>
+                                    {renderMANDOR()}
                                 </select>
 
                                 {formdata.map((formdataq, index) => (
@@ -330,14 +362,14 @@ const Scheduling = () => {
 
                     <div className="col-md-7">
                         <MaterialTable
-                            title="Data RAB"
+                            title="Data Scheduling"
                             columns={[
                                 { title: "ID", field: "id", hidden: true },
                                 { title: "Nama Proyek", field: "namaProyek", defaultGroupOrder: 0 },
                                 { title: "Uraian", field: "uraian", defaultGroupOrder: 0 },
-                                { title: "Tanggal Kerja", field: "tglKerja" },
                                 { title: "Perkiraan Durasi", field: "perkiraanDurasi" },
                                 { title: "Bobot Pekerjaan", field: "bobotPekerjaan" },
+                                { title: "Tanggal Kerja", field: "tglKerja" },
                             ]}
                             data={(resultq)}
                             options={{

@@ -32,7 +32,8 @@ const Dashboard = () => {
             namaProyek: group[0].idSchedulingProyek.idRabProyek.idProyek.namaProyek,
             uraian: group[0].uraian,
             created_at: dateFormat(group[0].created_at, "dd mmm yyyy HH:MM"),
-            status: group[0].status
+            status: group[0].status,
+            keterangan: group[0].keterangan
         }
     });
 
@@ -164,6 +165,7 @@ const Dashboard = () => {
                     {
                         ticks: {
                             beginAtZero: true,
+                            stepSize: 1
                         },
                     },
                 ],
@@ -263,7 +265,8 @@ const Dashboard = () => {
             <Navbar />
             {
                 (
-                    role === "direktur")
+                    role === "direktur" ||
+                    role === "pm")
                 &&
                 <div className="row" style={{ margin: 10 }}>
                     <div className="col-md-12">
@@ -277,7 +280,7 @@ const Dashboard = () => {
                                         { title: "Uraian", field: "uraian" },
                                         { title: "Date", field: "created_at", defaultSort: 'desc' },
                                         { title: "Status", field: "status" },
-
+                                        { title: "Keterangan", field: "keterangan" },
                                     ]}
                                     data={(log)}
                                     options={{

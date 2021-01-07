@@ -76,9 +76,11 @@ const Proyek = () => {
     }
     const renderPM = () => {
         return projectmanager.map(pm => {
-            return (
-                <option key={pm._id} value={pm._id} name={pm._id} >{pm.namaKaryawan}</option>
-            )
+            if (pm.status === 'pm') {
+                return (
+                    <option key={pm._id} value={pm._id} name={pm._id} >{pm.namaKaryawan}</option>
+                )
+            }
         })
     }
 

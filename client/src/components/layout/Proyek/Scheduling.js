@@ -13,6 +13,9 @@ import deletescheduling from '../../client/proyek/scheduling.delete'
 import hitrab from '../../client/proyek/rab.get'
 import hitproyek from '../../client/proyek/proyek.get'
 import hitsdm from '../../client/sumberdaya/sdmanusia.get'
+import 'react-date-range/dist/styles.css'; // main css file
+import 'react-date-range/dist/theme/default.css'; // theme css file
+import { DateRangePicker, DateRange } from 'react-date-range'
 
 const Scheduling = () => {
     const namaUser = localStorage.getItem('namaUser') || null
@@ -98,7 +101,7 @@ const Scheduling = () => {
         return rab.map(rabq => {
             if (namaUser === rabq.posted_by && rabq.status === "RAB Accepted") {
                 return (
-                    <option key={rabq._id} value={rabq._id} name='idRAB' label={rabq.idProyek.namaProyek}></option>
+                    <option key={rabq._id} value={rabq._id} data-valuea={rabq.idProyek.namaProyek} name='idRAB' label={rabq.idProyek.namaProyek}></option>
                 )
             }
         })
@@ -117,11 +120,29 @@ const Scheduling = () => {
     }
 
     // State menyimpan id rab darifrom
-    const [formRAB, setDataformrab] = useState([])
+    const [formRAB, setDataformrab] = useState(
+        { idRabProyek: '', namaProyek: '', mandorProyek: '' }
+    )
 
     const handlerChange = (e) => {
         // ambil idrab
-        setDataformrab(formdata => ({ ...formdata, [e.target.name]: e.target.value }))
+        const values = [...formdata];
+        if (e.target.name === "idRabProyek") {
+            values.idRabProyek = e.target.value
+            values.namaProyek = Array.from(e.target.selectedOptions, option => option.attributes.getNamedItem("data-valuea").value)
+        }
+        if (e.target.name === "mandorProyek") {
+            values.mandorProyek = e.target.value
+        }
+        setDataformrab(values)
+        // setDataformrab(formdata => ({ ...formdata, [e.target.name]: e.target.value }))
+    }
+
+    const [formMandor, setMandor] = useState([])
+
+    const handleMandor = (e) => {
+        // ambil id mandor
+        setMandor(formdata => ({ ...formdata, [e.target.name]: e.target.value }))
     }
 
     // Form Disini
@@ -133,7 +154,6 @@ const Scheduling = () => {
         const values = [...formdata];
         let i = 0
         let j = 0
-        let k = 0
         if (event.target.name === "uraianPekerjaan") {
             values[index].uraianPekerjaan = Array.from(event.target.selectedOptions, option => option.value)
             let tempHargaKegiatan = Array.from(event.target.selectedOptions, option => parseFloat(option.attributes.getNamedItem("data-valuea").value).toFixed(2))
@@ -207,7 +227,7 @@ const Scheduling = () => {
 
         if (c < 1 || c === undefined) {
             const idRAB = formRAB.idRabProyek
-            const idMandor = formRAB.mandorProyek
+            const idMandor = formMandor.mandorProyek
             postscheduling(formdata, idRAB, idMandor)
 
             const Toast = Swal.mixin({
@@ -273,6 +293,23 @@ const Scheduling = () => {
             })
     }
 
+    const date = new Date();
+    const dateStart = new Date(date.getTime() - (date.getTimezoneOffset() * 60000))
+        .toISOString()
+        .split("T")[0];
+
+    let durasiPengerjaan = 0
+    dataProyek.map(p1 => {
+        if (formRAB.namaProyek[0] === p1.namaProyek) {
+            return durasiPengerjaan = p1.durasiPengerjaan
+        }
+    })
+    let durasiAkhir = durasiPengerjaan * (1000 * 3600 * 24)
+    const dateAkhir = new Date(date.getTime() - (date.getTimezoneOffset() * 60000) + durasiAkhir)
+        .toISOString()
+        .split("T")[0];
+
+
     useEffect(() => {
         getData()
         getRab()
@@ -296,7 +333,7 @@ const Scheduling = () => {
                                     {renderRAB()}
                                 </select>
                                 <label htmlFor="idProyek">Mandor Proyek</label>
-                                <select className="form-control" id="mandorProyek" name="mandorProyek" onChange={handlerChange}>
+                                <select className="form-control" id="mandorProyek" name="mandorProyek" onChange={handleMandor}>
                                     <option value="">     </option>
                                     {renderMANDOR()}
                                 </select>
@@ -329,6 +366,8 @@ const Scheduling = () => {
                                             <input
                                                 type="date"
                                                 className="form-control"
+                                                min={dateStart}
+                                                max={dateAkhir}
                                                 id="tglKerja"
                                                 name="tglKerja"
                                                 value={formdataq.tglKerja}

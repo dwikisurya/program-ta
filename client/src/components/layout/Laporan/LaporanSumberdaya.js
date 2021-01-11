@@ -22,6 +22,17 @@ const LaporanSumberDaya = () => {
             console.log('Error')
         }
     }
+    const groups3 = _.groupBy(pelaporan, function (value) {
+        return value.idSchedulingProyek._id
+    });
+
+    const resultPersentase = _.map(groups3, function (group) {
+        return {
+            idProyek: group[0].idSchedulingProyek._id,
+            namaProyek: group[0].idSchedulingProyek.idRabProyek.idProyek.namaProyek,
+            total: _.sumBy(group, x => x.persentase).toFixed(0),
+        }
+    });
 
     const [proyek, setProyek] = useState([])
     const [formData, setFormData] = useState([])
@@ -35,9 +46,13 @@ const LaporanSumberDaya = () => {
     }
     const renderProyek = () => {
         return proyek.map(proyekq => {
-            return (
-                <option key={proyekq._id} value={proyekq.namaProyek} name={proyekq.namaProyek}>{proyekq.namaProyek}</option>
-            )
+            return resultPersentase.map(r1 => {
+                if (proyekq.namaProyek === r1.namaProyek && r1.total === '100') {
+                    return (
+                        <option key={proyekq._id} value={proyekq.namaProyek} name={proyekq.namaProyek}>{proyekq.namaProyek}</option>
+                    )
+                }
+            })
         })
     }
     // Ambil Data GroupBy idscheduling dan uraiannya ap
@@ -51,11 +66,12 @@ const LaporanSumberDaya = () => {
             namaProyek: group[0].idSchedulingProyek.idRabProyek.idProyek.namaProyek,
             idSDB: group[0].idSDB,
             idSDM: group[0].idSDM,
+            created_at: group[0].created_at
         }
     });
 
-    const dataSDM = _.flatMap(result, ({ idSchedulingProyek, namaProyek, idSDB, idSDM }) =>
-        _.flatMap(idSDM, ({ namaKaryawan }) => ({ idSchedulingProyek: idSchedulingProyek, namaProyek: namaProyek, namaKaryawan: namaKaryawan, idSDM: idSDM }))
+    const dataSDM = _.flatMap(result, ({ idSchedulingProyek, namaProyek, idSDB, idSDM, created_at }) =>
+        _.flatMap(idSDM, ({ namaKaryawan }) => ({ idSchedulingProyek: idSchedulingProyek, namaProyek: namaProyek, namaKaryawan: namaKaryawan, idSDM: idSDM, created_at: created_at }))
     )
     var groupSDM = _.groupBy(dataSDM, function (value) {
         return value.namaKaryawan + '#' + value.namaProyek
@@ -65,7 +81,7 @@ const LaporanSumberDaya = () => {
         return {
             namaProyek: group[0].namaProyek,
             namaKaryawan: group[0].namaKaryawan,
-            totalCount: _.countBy(group, Math.floor())
+            totalCount: _.countBy(group, Math.floor()),
         }
     });
 
@@ -91,7 +107,6 @@ const LaporanSumberDaya = () => {
 
     const rendertableSDM = () => {
         return laporanSDM.map(sdmq => {
-            console.log(sdmq)
             if (sdmq.namaProyek === formData.namaProyek) {
                 return (
                     <tr key={sdmq.id}>

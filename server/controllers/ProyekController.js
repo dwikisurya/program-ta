@@ -11,6 +11,7 @@ module.exports = class ProyekController {
         const projectmanager = req.body.projectManager
         const clientproyek = req.body.clientProyek
         const lokasiproyek = req.body.lokasiProyek
+        const durasiPengerjaan = req.body.durasiPengerjaan
         const statusproyek = "Created"
         const created_at = Date.now()
         const updated_at = Date.now()
@@ -25,7 +26,8 @@ module.exports = class ProyekController {
             projectManager: projectmanager,
             created_at: created_at,
             updated_at: updated_at,
-            accepted_at: accepted_at
+            accepted_at: accepted_at,
+            durasiPengerjaan: durasiPengerjaan
         }).then((result) => {
             res.status(201).json({ msg: 'Data Berhasil Ditambah' })
         }).catch((err) => {

@@ -13,7 +13,8 @@ import { HorizontalBar, Bar } from 'react-chartjs-2'
 
 const Dashboard = () => {
     const role = localStorage.getItem('role') || null
-    // Get Pelaporan, untuk chart Proyek Berjalan
+    const namaUser = localStorage.getItem('namaUser') || null
+
     const [pelaporan, setPelaporan] = useState([])
     const getPelaporan = async () => {
         const pelaporanHit = await hitpelaporan()
@@ -23,6 +24,19 @@ const Dashboard = () => {
             console.log('Error')
         }
     }
+
+    const [proyek, setProyek] = useState([])
+
+    const getProyek = async () => {
+        const proyekhit = await hitproyek()
+        if (proyekhit.status === 200) {
+            setProyek(proyekhit.data)
+        } else {
+            console.log(proyekhit)
+        }
+    }
+
+    // Get Pelaporan, untuk chart Proyek Berjalan
     const g1 = _.groupBy(pelaporan, function (value) {
         return value._id + '*' + value.idSchedulingProyek._id;
     });
@@ -44,13 +58,13 @@ const Dashboard = () => {
     const resultPelaporan = _.map(groupPelaporan, function (group) {
         return {
             namaProyek: group[0].idSchedulingProyek.idRabProyek.idProyek.namaProyek,
-            total: _.sumBy(group, x => x.persentase).toFixed(2), //returns object
+            total: _.sumBy(group, x => x.persentase).toFixed(2),
             created_at: dateFormat(group[0].created_at, "yyyy")
         }
     });
 
     const groupPerYear = _.groupBy(resultPelaporan, function (value) {
-        return value.created_at
+        return value.created_at + '#' + value.namaProyek
     });
 
     const resultPerYear = _.map(groupPerYear, function (group) {
@@ -60,13 +74,13 @@ const Dashboard = () => {
             tahun: group[0].created_at
         }
     });
-
+   
 
     const dataProyekBerjalan = {
         labels: resultPelaporan.map(m => m.namaProyek),
         datasets: [
             {
-                label: '% Pekerjaan',
+                label: "label",
                 data: resultPelaporan.map(m => m.total),
                 backgroundColor: [
                     'rgba(255, 99, 132, 0.2)',
@@ -93,6 +107,7 @@ const Dashboard = () => {
                     {
                         ticks: {
                             beginAtZero: true,
+                            stepSize: 1
                         },
                     },
                 ],
@@ -101,16 +116,6 @@ const Dashboard = () => {
     }
 
     // Get Proyek untuk Lokasi / Kota Proyek Chart
-    const [proyek, setProyek] = useState([])
-
-    const getProyek = async () => {
-        const proyekhit = await hitproyek()
-        if (proyekhit.status === 200) {
-            setProyek(proyekhit.data)
-        } else {
-            console.log(proyekhit)
-        }
-    }
 
     const groupProyekTotal = _.groupBy(proyek, function (value) {
         return value.kategoriProyek.namaKategori + '*' + value.lokasiProyek;

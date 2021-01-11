@@ -24,7 +24,8 @@ const proyekSchema = new Schema({
     statusProyek: String,
     created_at: Date,
     updated_at: Date,
-    accepted_at: Date
+    accepted_at: Date,
+    durasiPengerjaan: Number
 })
 
 const proyek = mongoose.model('proyek', proyekSchema)

@@ -49,11 +49,11 @@ const PelaporanLapangan = () => {
     }
 
     // Ambil Data GroupBy idscheduling dan uraiannya ap
-    var groups1 = _.groupBy(pelaporan, function (value) {
+    const groups1 = _.groupBy(pelaporan, function (value) {
         return value._id + '*' + value.idSchedulingProyek._id + '#' + value.uraian;
     });
 
-    var result = _.map(groups1, function (group) {
+    const result = _.map(groups1, function (group) {
         return {
             id: group[0]._id,
             idSchedulingProyek: group[0].idSchedulingProyek,
@@ -69,6 +69,28 @@ const PelaporanLapangan = () => {
             keterangan: group[0].keterangan
         }
     });
+
+    const groups3 = _.groupBy(pelaporan, function (value) {
+        return value.idSchedulingProyek._id
+    });
+
+    const resultPersentase = _.map(groups3, function (group) {
+        return {
+            idProyek: group[0].idSchedulingProyek._id,
+            namaProyek: group[0].idSchedulingProyek.idRabProyek.idProyek.namaProyek,
+            total: _.sumBy(group, x => x.persentase).toFixed(0),
+        }
+    });
+
+    function checkPersentase() {
+        resultPersentase.map(r1 => {
+            if (r1.total === 100) {
+                console.log(r1.namaProyek + 'Sudah Selesai')
+            } else {
+                console.log('Belum ada proyek selesai')
+            }
+        })
+    }
 
     // Get Data SDB Form
     const [dataSDB, setDataSDB] = useState([])
@@ -157,11 +179,11 @@ const PelaporanLapangan = () => {
 
     const handleSubmit = e => {
         e.preventDefault();
-        var groups1 = _.groupBy(pelaporan, function (value) {
+        const groups1 = _.groupBy(pelaporan, function (value) {
             return value.idSchedulingProyek._id + '#' + value.uraian;
         });
 
-        var data = _.map(groups1, function (group) {
+        const data = _.map(groups1, function (group) {
             return {
                 id: group[0]._id,
                 idSchedulingProyek: group[0].idSchedulingProyek,
@@ -174,7 +196,6 @@ const PelaporanLapangan = () => {
         let a = formdata[0].uraian
         let b = 0
         let c = 0
-
 
         data.map(d1 => {
             if (formdata[0].idSchedulingProyek === d1.idSchedulingProyek._id && formdata[0].uraian === d1.uraian) {
@@ -190,11 +211,11 @@ const PelaporanLapangan = () => {
         })
 
         // Check Date
-        var groups2 = _.groupBy(scheduling, function (value) {
+        const groups2 = _.groupBy(scheduling, function (value) {
             return value._id + '#' + value.idRabProyek.idProyek.namaProyek;
         });
 
-        var dataqq = _.map(groups2, function (group) {
+        const dataqq = _.map(groups2, function (group) {
             return {
                 id: group[0]._id,
                 namaProyek: group[0].idRabProyek.idProyek.namaProyek,
@@ -203,7 +224,7 @@ const PelaporanLapangan = () => {
         });
 
         const result = _.flatMap(dataqq, ({ id, namaProyek, sch }) =>
-            _.flatMap(sch, ({ uraianPekerjaan, tglKerja, bobotKegiatan, bobotPekerjaan, perkiraanDurasi, created_at }) => ({ id: id, namaProyek: namaProyek, uraian: uraianPekerjaan[0], tglKerja: tglKerja, bobotKegiatan: bobotKegiatan, bobotPekerjaan: bobotPekerjaan, perkiraanDurasi: perkiraanDurasi }))
+            _.flatMap(sch, ({ uraianPekerjaan, tglKerja, bobotKegiatan, bobotPekerjaan, perkiraanDurasi }) => ({ id: id, namaProyek: namaProyek, uraian: uraianPekerjaan[0], tglKerja: tglKerja, bobotKegiatan: bobotKegiatan, bobotPekerjaan: bobotPekerjaan, perkiraanDurasi: perkiraanDurasi }))
         )
         const resultq = _.map(result, function (group) {
             return {
@@ -214,7 +235,7 @@ const PelaporanLapangan = () => {
                 perkiraanDurasi: group.perkiraanDurasi,
             }
         })
-        console.log({ resultq, result })
+
         const ck_date = resultq.map(rs => {
             if (rs.id === formdata[0].idSchedulingProyek && rs.uraian === a) {
                 return rs.perkiraanDurasi
@@ -230,18 +251,28 @@ const PelaporanLapangan = () => {
         //Ambil Hari
         const today = new Date();
         // Durasi dan Date Start
-        const ck_durasi = parseInt(ck_date.toString().replace(/,/g, '')) * (1000 * 3600 * 24)
+        const ck_durasi = parseInt(ck_date.toString().replace(/,/g, ''))
         const date1 = new Date(dateStart);
-        const Difference_In_Time = today.getTime() - (date1.getTime() + ck_durasi)
+
+        let varDurasi = 0
+        if (ck_durasi > 1) {
+            varDurasi = ck_durasi - b
+        } else {
+            varDurasi = 1
+        }
+
+        let durasiAkhir = varDurasi * (1000 * 3600 * 24)
+        const Difference_In_Time = today.getTime() - (date1.getTime() + durasiAkhir)
         // To calculate the no. of days between two dates 
         const Difference_In_Days = Difference_In_Time / (1000 * 3600 * 24);
-
         if (Difference_In_Days <= 0) {
             setDataForm(state => (state[0].status = 'Tepat waktu', state))
         } else {
             setDataForm(state => (state[0].status = `Telat ` + Difference_In_Days.toFixed(0) + ` hari`, state))
         }
 
+
+        console.log(c)
         if (b < c) {
             postpelaporan(formdata[0])
             const Toast = Swal.mixin({
@@ -279,9 +310,8 @@ const PelaporanLapangan = () => {
                 text: `Data Tidak Boleh Kosong atau\nData Uraian:` + a + ` sudah terpenuhi\nSilahkan isi data perkembangan yang lain`,
             })
         }
+    }
 
-
-    };
     const deleteRow = (id, e) => {
         deletepelaporan(id)
             .then(res => {
@@ -312,6 +342,7 @@ const PelaporanLapangan = () => {
         getRab()
         getSDB()
         getSDM()
+        checkPersentase()
     }, [])
 
     return (

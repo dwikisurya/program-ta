@@ -41,7 +41,8 @@ const Proyek = () => {
             projectManager: group.projectManager.namaKaryawan,
             created_at: dateFormat(group.created_at, "dd mmmm yyyy"),
             updated_at: dateFormat(group.updated_at, "dd mmmm yyyy"),
-            accepted_at: dateFormat(group.accepted_at, "dd mmmm yyyy")
+            accepted_at: dateFormat(group.accepted_at, "dd mmmm yyyy"),
+            durasiPengerjaan: group.durasiPengerjaan
         }
     });
 
@@ -198,6 +199,10 @@ const Proyek = () => {
                             <label htmlFor="inp_lokasiproyek">Lokasi</label>
                             <input type="text" className="form-control" name="lokasiProyek" onInput={handlerChange.bind(this)} />
                         </div>
+                        <div className="form-group">
+                            <label htmlFor="inp_durasipengerjaan">Lama Durasi Pengerjaan</label>
+                            <input type="number" className="form-control" name="durasiPengerjaan" onInput={handlerChange.bind(this)} />
+                        </div>
                         <button type="submit" className="btn btn-primary">Submit</button>
 
 
@@ -216,7 +221,7 @@ const Proyek = () => {
                             { title: "Status", field: "statusProyek" },
                             { title: "Project Manager", field: "projectManager" },
                             { title: "Created At", field: "created_at" },
-                            { title: "Updated At", field: "updated_at" },
+                            { title: "Durasi Pengerjaan / Hari", field: "durasiPengerjaan" },
                             {
                                 title: "Edit",
                                 field: "internal_action",

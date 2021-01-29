@@ -5,7 +5,7 @@ import hitpekerjaan from '../../client/sumberdaya/kegiatanproyek.get'
 
 import putrab from '../../client/proyek/rab.put'
 
-const ModalRAB = ({ rowData }) => {
+const ModalStatusRAB = ({ rowData }) => {
     const [rab, setRab] = useState(rowData)
 
     const [formdata, setFormData] = useState([
@@ -97,7 +97,6 @@ const ModalRAB = ({ rowData }) => {
 
     // Populate Select For Pekerjaan 
     const [dataPekerjaan, setDataPekerjaan] = useState([])
-
     const getPekerjaan = async () => {
         const pekerjaan = await hitpekerjaan()
         if (pekerjaan.status === 200) {
@@ -130,17 +129,17 @@ const ModalRAB = ({ rowData }) => {
                 className="btn btn-warning"
                 data-toggle="modal"
                 data-target={`#_id${rowData.id}`}
-            >Edit</button>
+            >Status</button>
 
             <div
                 className="modal"
-                id={`_id${rowData.id}`}
+                id={`_id${rowData.id}` + "AA"}
                 onClick={() => setRab(rowData)}
             >
                 <div className="modal-dialog modal-lg">
                     <div className="modal-content">
                         <div className="modal-header">
-                            <h4 className="modal-title">Edit RAB</h4>
+                            <h4 className="modal-title">Status RAB</h4>
 
                             <button
                                 type="button"
@@ -158,59 +157,6 @@ const ModalRAB = ({ rowData }) => {
                                         {renderProyek()}
                                     </select>
                                 </div>
-                                {formdata.map((formdataq, index) => (
-                                    <div>
-
-                                        <div className="form-group col-sm-6">
-                                            <label htmlFor="volume">Id Pekerjaan</label>
-                                            <select multiple class="form-control" id="idPekerjaan" name="idPekerjaan" onChange={event => handleInputChange(index, event)}>
-                                                {renderPekerjaan()}
-                                            </select>
-                                        </div>
-
-
-                                        <div className="form-group col-sm-4">
-                                            <label htmlFor="volume">Volume</label>
-                                            <input
-                                                type="text"
-                                                className="form-control"
-                                                id="volume"
-                                                name="volume"
-                                                value={formdataq.volume}
-                                                onChange={event => handleInputChange(index, event)}
-                                            />
-                                        </div>
-
-                                        <div className="form-group col-sm-4">
-                                            <label htmlFor="uraianPekerjaan">Uraian Pekerjaan</label>
-                                            <input
-                                                type="text"
-                                                className="form-control"
-                                                id="uraianPekerjaan"
-                                                name="uraianPekerjaan"
-                                                value={formdataq.uraianPekerjaan}
-                                                onChange={event => handleInputChange(index, event)}
-                                            />
-                                        </div>
-
-                                        <div className="form-group col-sm-2">
-                                            <button
-                                                className="btn btn-link"
-                                                type="button"
-                                                onClick={() => handleRemoveFields(index)}
-                                            >
-                                                -
-                    </button>
-                                            <button
-                                                className="btn btn-link"
-                                                type="button"
-                                                onClick={() => handleAddFields()}
-                                            >
-                                                +
-                    </button>
-                                        </div>
-                                    </div>
-                                ))}
                             </div>
                         </div>
 
@@ -221,7 +167,7 @@ const ModalRAB = ({ rowData }) => {
                                 data-dismiss="modal"
                                 onClick={e => updateDescription(e)}
                             >
-                                Edit
+                                Update Status
   </button>
                             <button
                                 type="button"
@@ -239,4 +185,4 @@ const ModalRAB = ({ rowData }) => {
         </Fragment>
     )
 }
-export default ModalRAB
+export default ModalStatusRAB

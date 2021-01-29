@@ -13,6 +13,8 @@ import hitscheduling from '../../client/proyek/scheduling.get'
 import hitrab from '../../client/proyek/rab.get'
 import hitsdb from '../../client/sumberdaya/sdbarang.get'
 import hitsdm from '../../client/sumberdaya/sdmanusia.get'
+import hitproyek from '../../client/proyek/proyek.get'
+import putproyekstatus from '../../client/proyek/proyek.status.put'
 
 
 const PelaporanLapangan = () => {
@@ -82,13 +84,23 @@ const PelaporanLapangan = () => {
         }
     });
 
+    // Update Status Proyek 
+    const [updateProyek, setUpdateDataProyek] = useState({
+        status: 'Proyek Selesai'
+    })
+
+    // Update Status Proyek Ketika persentase sudah 100 & status != proyek selesai
     function checkPersentase() {
         resultPersentase.map(r1 => {
-            if (r1.total === 100) {
-                console.log(r1.namaProyek + 'Sudah Selesai')
-            } else {
-                console.log('Belum ada proyek selesai')
-            }
+            proyek.map(p1 => {
+                if (r1.total >= 100 && r1.namaProyek === p1.namaProyek) {
+                    if (p1.statusProyek !== 'Proyek Selesai') {
+                        console.log(p1.namaProyek)
+                        let idProyek = p1._id
+                        putproyekstatus(idProyek, updateProyek)
+                    }
+                }
+            })
         })
     }
 
@@ -189,17 +201,25 @@ const PelaporanLapangan = () => {
                 idSchedulingProyek: group[0].idSchedulingProyek,
                 namaProyek: group[0].idSchedulingProyek.idRabProyek.idProyek.namaProyek,
                 uraian: group[0].uraian,
-                count: _.countBy(group, 'uraian'),
+                persentase: group[0].persentase,
+                count: _.countBy(group, function (a) { if (a.persentase != 0) return a.uraian }),
             }
-        });
+        })
 
+        // A - uraian
         let a = formdata[0].uraian
+        // B - Count Durasi
         let b = 0
+        // C - Perkiraan Durasi
         let c = 0
 
         data.map(d1 => {
             if (formdata[0].idSchedulingProyek === d1.idSchedulingProyek._id && formdata[0].uraian === d1.uraian) {
-                return b = d1.count[a]
+                if (d1.count[a] === undefined) {
+                    return b = 0
+                } else {
+                    return b = d1.count[a]
+                }
             }
         })
 
@@ -271,8 +291,11 @@ const PelaporanLapangan = () => {
             setDataForm(state => (state[0].status = `Telat ` + Difference_In_Days.toFixed(0) + ` hari`, state))
         }
 
-
-        console.log(c)
+        if (checked === true) {
+            setDataForm(state => (state[0].persentase = 0, state))
+            setDataForm(state => (state[0].status = 'Trouble', state))
+        }
+        console.log({ a, b, c })
         if (b < c) {
             postpelaporan(formdata[0])
             const Toast = Swal.mixin({
@@ -290,7 +313,7 @@ const PelaporanLapangan = () => {
                 icon: 'success',
                 title: 'Data telah ditambah'
             }).then(res => {
-                getData()
+                window.location.reload(true);
             })
         } else {
             const Toast = Swal.mixin({
@@ -336,12 +359,23 @@ const PelaporanLapangan = () => {
             })
     }
 
+    const [proyek, setProyek] = useState([])
+    const getProyek = async () => {
+        const proyekhit = await hitproyek()
+        if (proyekhit.status === 200) {
+            setProyek(proyekhit.data)
+        } else {
+            console.log(proyekhit)
+        }
+    }
+    const [checked, setChecked] = useState(false)
     useEffect(() => {
         getData()
         getScheduling()
         getRab()
         getSDB()
         getSDM()
+        getProyek()
         checkPersentase()
     }, [])
 
@@ -396,6 +430,12 @@ const PelaporanLapangan = () => {
                                             onChange={event => handleInputChange(index, event)}
                                         />
                                     </div>
+                                    <br />
+                                    <div className="form-group col-md-12" style={{ marginLeft: 20 }}>
+                                        <input type="checkbox" class="form-check-input" id="exampleCheck1" onChange={() => setChecked(!checked)}></input>
+                                        <label className="form-check-label" for="exampleCheck1">Check Jika Terjadi Trouble Didalam Pengerjaan</label>
+                                    </div>
+
                                 </Fragment>
                             ))}
                         </div>
@@ -414,7 +454,7 @@ const PelaporanLapangan = () => {
                     <MaterialTable
                         title="Data Pelaporan"
                         columns={[
-                            { title: "ID", field: "id" },
+                            { title: "ID", field: "id", hidden: true },
                             { title: "ID", field: "idSchedulingProyek._id", hidden: true },
                             { title: "Nama Proyek", field: "idSchedulingProyek.idRabProyek.idProyek.namaProyek", defaultGroupOrder: 0 },
                             { title: "Uraian", field: "uraian", defaultGroupOrder: 0 },

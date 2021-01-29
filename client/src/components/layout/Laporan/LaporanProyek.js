@@ -91,7 +91,7 @@ const LaporanProyek = () => {
     const dataSch = _.flatMap(mapSCH, ({ id, namaProyek, sch, created_at }) =>
         _.flatMap(sch, ({ uraianPekerjaan, tglKerja, bobotKegiatan, bobotPekerjaan, perkiraanDurasi, created_at }) => ({ id: id, namaProyek: namaProyek, uraian: uraianPekerjaan[0], tglKerja: tglKerja, bobotKegiatan: bobotKegiatan, bobotPekerjaan: bobotPekerjaan, perkiraanDurasi: perkiraanDurasi, created_at: created_at }))
     )
-
+    console.log(dataSch)
     const laporanSch = _.map(dataSch, function (group) {
         return {
             id: group.id,
@@ -101,7 +101,7 @@ const LaporanProyek = () => {
             bobotKegiatan: group.bobotKegiatan,
             bobotPekerjaan: group.bobotPekerjaan,
             perkiraanDurasi: group.perkiraanDurasi + ' hari',
-            perkiraanBerakhir: dateFormat(parseInt(dateFormat(group.tglKerja, 'dd')) + group.perkiraanDurasi + dateFormat(group.tglKerja, " mmmm yyyy"), 'dd mmmm yyyy')
+
         }
     });
 
@@ -113,7 +113,6 @@ const LaporanProyek = () => {
                         <td>{schq.uraian}</td>
                         <td>{schq.perkiraanDurasi}</td>
                         <td>{schq.tglKerja}</td>
-                        <td>{schq.perkiraanBerakhir}</td>
                     </tr>
                 )
             }
@@ -196,6 +195,36 @@ const LaporanProyek = () => {
             }
         })
     }
+    const groupsTeamRAB = _.groupBy(rab, function (value) {
+        return value._id + '#' + value.idProyek.namaProyek;
+    });
+    const dataTeamRAB = _.map(groupsTeamRAB, function (group) {
+        return {
+            id: group[0]._id,
+            namaProyek: group[0].idProyek.namaProyek,
+            idSDM: group[0].idSDM,
+            workhourSDM: group[0].workhourSDM
+        }
+    });
+
+    const rendertableTeamRAB = () => {
+        return dataTeamRAB.map(dtr => {
+            if (dtr.namaProyek === formData.namaProyek) {
+                return (
+                    <tr key={dtr.id}>
+                        <td> {dtr.idSDM.map(nm => {
+                            return <tr><td style={{ height: 100 }}>{nm.namaKaryawan}<br></br></td></tr>
+                        })}
+                        </td>
+                        <td> {dtr.workhourSDM.map(nm => {
+                            return <tr><td style={{ height: 100 }}>{nm + ' Jam'}<br></br></td></tr>
+                        })}
+                        </td>
+                    </tr>
+                )
+            }
+        })
+    }
 
     const exportPDFRAB = () => {
         var imgData =
@@ -224,7 +253,13 @@ const LaporanProyek = () => {
                 2: { cellWidth: 25 },
                 3: { cellWidth: 30 },
                 // etc
-            }
+            },
+
+        })
+        doc.autoTable({
+            startY: doc.autoTable.previous.finalY + 1115,
+            html: '#TeamRAB',
+            useCss: true,
         })
         doc.save('rab.pdf')
     }
@@ -379,7 +414,6 @@ const LaporanProyek = () => {
                                     <th>Uraian Pekerjaan</th>
                                     <th>Durasi Pekerjaan</th>
                                     <th>Tanggal Kerja</th>
-                                    <th>Perkiraan Berakhir</th>
                                 </tr>
                             </thead>
                             <tbody>{rendertableSch()}</tbody>
@@ -403,6 +437,20 @@ const LaporanProyek = () => {
                             <tbody>{rendertablePelaporan()}</tbody>
                         </table>
                         <button type="button" class="btn btn-primary" onClick={() => exportPDFPELAPORAN()}>Download</button>
+                    </div>
+
+                    <div className="col-md-4" style={{ visibility: 'hidden', height: 0, width: 0 }}>
+                        <h5>Tim RAB</h5>
+                        <table className="table table-bordered" id="TeamRAB">
+                            <thead>
+                                <tr>
+                                    <th>Nama Karyawan</th>
+                                    <th>Work Hour /Hari</th>
+                                </tr>
+                            </thead>
+                            <tbody>{rendertableTeamRAB()}</tbody>
+                        </table>
+                        <button type="button" class="btn btn-primary" onClick={() => exportPDFRAB()}>Download</button>
                     </div>
 
                 </div>

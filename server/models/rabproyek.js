@@ -21,6 +21,20 @@ const rabSchema = new Schema({
         }],
         totalHarga: Number,
     }],
+    idSDM: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'sdManusia'
+    }],
+    idSDB: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'sdBarang'
+    }],
+    workhourSDM: [{
+        type: Number
+    }],
+    pcsSDB: [{
+        type: Number
+    }],
     status: String,
     grandTotal: Number,
     created_at: Date,

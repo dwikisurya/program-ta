@@ -1,14 +1,11 @@
 import { React, useEffect, useState } from 'react'
 import Navbar from '../Navbar'
-import dateFormat from 'dateformat'
 import _ from 'lodash'
 import jsPDF from 'jspdf'
-import autoTable from 'jspdf-autotable'
-import pdfMake from "pdfmake/build/pdfmake";
-import pdfFonts from "pdfmake/build/vfs_fonts";
 
 import hitpelaporan from '../../client/proyek/perkembangan.get'
 import hitproyek from '../../client/proyek/proyek.get'
+import hitrab from '../../client/proyek/rab.get'
 
 const LaporanSumberDaya = () => {
 
@@ -100,10 +97,42 @@ const LaporanSumberDaya = () => {
         }
     });
 
+    // RAB
+    const [rab, setRab] = useState([])
+    const getRAB = async () => {
+        const rabhit = await hitrab()
+        if (rabhit.status = 200) {
+            setRab(rabhit.data)
+        } else {
+            console.log('Error')
+        }
+    }
+
     const handlerChange = (e) => {
         e.preventDefault();
         setFormData(formdata => ({ ...formdata, [e.target.name]: e.target.value }))
     }
+
+    // WorkHour
+    const groups2 = _.groupBy(rab, function (value) {
+        return value._id + '#' + value.idProyek.namaProyek;
+    });
+    const dataqq = _.map(groups2, function (group) {
+        return {
+            id: group[0]._id,
+            namaProyek: group[0].idProyek.namaProyek,
+            idSDM: group[0].idSDM,
+            workhourSDM: group[0].workhourSDM
+        }
+    });
+    const indexsdm = _.map(groups2, function (group) {
+        return {
+            idSDM: group[0].idSDM,
+        }
+    });
+
+    // let a = _.findIndex(flatSDM, function (o) { return o.namaKaryawan ===  });
+    //console.log(indexworkhour[0].workhourSDM[1])
 
     const rendertableSDM = () => {
         return laporanSDM.map(sdmq => {
@@ -117,6 +146,26 @@ const LaporanSumberDaya = () => {
             }
         })
     }
+
+    const rendertableSDMWokrHour = () => {
+        return dataqq.map(dq => {
+            return dq.idSDM.map(sdmq => {
+                return laporanSDM.map(ls => {
+                    if (ls.namaProyek === dq.namaProyek && ls.namaKaryawan === sdmq.namaKaryawan) {
+                        return (
+                            <tr>
+                                <td>{ls.namaKaryawan}</td>
+                                {dq.workhourSDM.map(nm => {
+                                    return <td>{ls.totalCount[undefined] * nm + ' Jam'}</td>
+                                })}
+                            </tr>
+                        )
+                    }
+                })
+            })
+        })
+    }
+
     const rendertableSDB = () => {
         return laporanSDB.map(sdbq => {
             if (sdbq.namaProyek === formData.namaProyek) {
@@ -136,7 +185,10 @@ const LaporanSumberDaya = () => {
         const doc = new jsPDF()
         const finalY = doc.lastAutoTable.finalY || 10
         const namaProyek = `SDM Proyek : ` + formData.namaProyek
+        const header = function () {
+            doc.setFontSize(14);
 
+        };
         const today = new Date();
         const date = today.getDate() + '-' + (today.getMonth() + 1) + '-' + today.getFullYear()
         const time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds()
@@ -151,6 +203,12 @@ const LaporanSumberDaya = () => {
             startY: finalY + 30,
             html: '#SDM',
             useCss: true,
+            didDrawPage: header
+        })
+        doc.autoTable({
+            html: '#workHour',
+            useCss: true,
+            didDrawPage: header
         })
         doc.save(`SDM ` + formData.namaProyek + `.pdf`)
     }
@@ -183,6 +241,7 @@ const LaporanSumberDaya = () => {
     useEffect(() => {
         getData()
         getProyek()
+        getRAB()
     }, [])
 
     return (
@@ -226,12 +285,25 @@ const LaporanSumberDaya = () => {
                     </table>
                     <button type="button" class="btn btn-primary" onClick={() => exportPDFSDB()}>Download</button>
                 </div>
+                <div className="col-md-5" style={{ visibility: 'hidden', height: 0, width: 0 }}>
+                    <h5>Sumber Daya Manusia</h5>
+                    <table className="table table-bordered" id="workHour">
+                        <thead>
+                            <tr>
+                                <th>SDM Di RAB</th>
+                                <th>Work Hour/Jam</th>
+                            </tr>
+                        </thead>
+                        <tbody>{rendertableSDMWokrHour()}</tbody>
+                    </table>
+                    <button type="button" class="btn btn-primary" onClick={() => exportPDFSDM()}>Download</button>
+                </div>
 
             </div>
 
 
 
-        </div>
+        </div >
     )
 }
 

@@ -1,6 +1,7 @@
 import axios from 'axios'
 
 export default async (idform, reqBody) => {
+    console.log(reqBody)
     try {
         let res = await axios({
             method: 'PUT',

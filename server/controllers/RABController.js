@@ -15,6 +15,10 @@ module.exports = class RABController {
         const status = "Created"
         const created_at = Date.now()
         const posted_by = req.body.posted_by
+        const inputsdm = req.body.idSDM
+        const inputsdb = req.body.idSDB
+        const inputworkhour = req.body.workhourSDM
+        const inputpcs = req.body.pcsSDB
 
         rabproyek.create({
             idProyek: idproyek,
@@ -24,11 +28,16 @@ module.exports = class RABController {
             updated_at: updated_at,
             created_at: created_at,
             posted_by: posted_by,
+            idSDM: inputsdm,
+            idSDB: inputsdb,
+            workhourSDM: inputworkhour,
+            pcsSDB: inputpcs
         }).then((result) => {
             res.status(201).json({ msg: 'Data Berhasil Ditambah' })
             console.log(result)
         }).catch((err) => {
             res.status(500).json(err)
+            console.log(err)
         })
     }
 
@@ -42,6 +51,13 @@ module.exports = class RABController {
             }).populate({
                 path: 'rab.idKegiatanProyek',
                 select: 'namaKegiatan-_id'
+            }).populate({
+                path: 'idSDB',
+                select: 'namaBarang-_id'
+            })
+            .populate({
+                path: 'idSDM',
+                select: 'namaKaryawan-_id'
             })
             .then((result) => {
                 res.status(200).json(result)
@@ -122,6 +138,7 @@ module.exports = class RABController {
                 res.status(500).send(err)
             } else {
                 res.status(200).send(docs)
+                console.log(id, status)
             }
         })
     }

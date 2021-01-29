@@ -3,10 +3,13 @@ import Navbar from './Navbar'
 import _ from 'lodash'
 import MaterialTable from 'material-table'
 import dateFormat from 'dateformat'
+import Swal from 'sweetalert2'
 
 import hitpelaporan from '../client/proyek/perkembangan.get'
 import hitproyek from '../client/proyek/proyek.get'
 import hitrab from '../client/proyek/rab.get'
+import hitpelaporantrouble from '../client/proyek/pelaporantrouble.get'
+import postpelaporantrouble from '../client/proyek/pelaporantrouble.post'
 
 import { HorizontalBar, Bar } from 'react-chartjs-2'
 
@@ -59,7 +62,8 @@ const Dashboard = () => {
         return {
             namaProyek: group[0].idSchedulingProyek.idRabProyek.idProyek.namaProyek,
             total: _.sumBy(group, x => x.persentase).toFixed(2),
-            created_at: dateFormat(group[0].created_at, "yyyy")
+            created_at: dateFormat(group[0].created_at, "yyyy"),
+            date: group[0].created_at
         }
     });
 
@@ -71,10 +75,10 @@ const Dashboard = () => {
         return {
             namaProyek: group[0].namaProyek,
             total: group[0].total,
-            tahun: group[0].created_at
+            tahun: group[0].created_at,
+            date: group[0].date
         }
     });
-   
 
     const dataProyekBerjalan = {
         labels: resultPelaporan.map(m => m.namaProyek),
@@ -248,7 +252,7 @@ const Dashboard = () => {
 
     const rendertable = () => {
         return dataProyekBelumAcc.map(d1 => {
-            if (d1.status != "RAB Accepted") {
+            if (d1.status != "RAB Accepted" && d1.status != "Proyek Selesai" && d1.status != "Proyek Cancel") {
                 return (
                     <tr key={d1.id}>
                         <td>{d1.namaProyek}</td>
@@ -259,10 +263,66 @@ const Dashboard = () => {
         })
     }
 
+    const [pelaporanTrouble, setPelaporanTrouble] = useState([])
+    const getPelaporanTrouble = async () => {
+        const pelaporantrouble = await hitpelaporantrouble()
+        if (pelaporantrouble.status = 200) {
+            setPelaporanTrouble(pelaporantrouble.data)
+        } else {
+            console.log('Error')
+        }
+    }
+
+    // Pelaporan Trouble
+    const revisiTrouble = (e, id, namaproyek) => {
+        if (role === "pm") {
+            Swal.fire({
+                title: 'Harap isi keterangan',
+                input: 'text',
+                inputAttributes: {
+                    autocapitalize: 'off'
+                },
+                showCancelButton: true,
+                confirmButtonText: 'Simpan',
+                showLoaderOnConfirm: true,
+                preConfirm: (statusQ) => {
+                    pelaporanTrouble.map(ptrouble => {
+                        if (id != ptrouble.idPelaporan)
+                            postpelaporantrouble(id, namaproyek, statusQ, namaUser)
+                    })
+                },
+                allowOutsideClick: () => !Swal.isLoading()
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'Berhasil disimpan',
+                    })
+                }
+            })
+        } else {
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 1000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            })
+            Toast.fire({
+                icon: 'error',
+                title: `Tidak bisa melakukan aksi karena role bukan semestinya.`
+            })
+        }
+    }
+
     useEffect(() => {
         getPelaporan()
         getProyek()
         getRAB()
+        getPelaporanTrouble()
     }, [])
 
     return (
@@ -288,6 +348,34 @@ const Dashboard = () => {
                                         { title: "Keterangan", field: "keterangan" },
                                     ]}
                                     data={(log)}
+                                    actions={[
+                                        rowData => ({
+                                            icon: 'error',
+                                            tooltip: 'Solve Trouble',
+                                            disabled: rowData.status != "Trouble",
+                                            onClick: (e, rowData) => revisiTrouble(e, rowData.id, rowData.namaProyek),
+                                        })
+                                    ]}
+                                    options={{
+                                        grouping: true,
+                                        paging: true,
+                                        pageSize: 5,
+                                        search: false,
+                                        actionsColumnIndex: -1
+                                    }}
+                                />
+
+                                <MaterialTable
+                                    title="Log Penyelesaian Trouble"
+                                    columns={[
+                                        { title: "ID", field: "id", hidden: true },
+                                        { title: "Id Pelaporan", field: "idPelaporan" },
+                                        { title: "Nama Proyek", field: "namaProyek", defaultGroupOrder: 1 },
+                                        { title: "Uraian", field: "uraian" },
+                                        { title: "Date", field: "created_at", defaultSort: 'desc' },
+                                        { title: "Posted", field: "posted_by" },
+                                    ]}
+                                    data={(pelaporanTrouble)}
                                     options={{
                                         grouping: true,
                                         paging: true,
@@ -347,7 +435,8 @@ const Dashboard = () => {
                                             grouping: true,
                                             paging: true,
                                             pageSize: 5,
-                                            search: false
+                                            search: false,
+
                                         }}
                                     />
                                 </div>

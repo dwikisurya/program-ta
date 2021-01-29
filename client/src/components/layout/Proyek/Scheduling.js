@@ -5,7 +5,7 @@ import _ from 'lodash'
 import MaterialTable from "material-table"
 import Swal from 'sweetalert2'
 
-import putrabstatus from '../../client/proyek/rab.status.put'
+import putproyekstatus from '../../client/proyek/proyek.status.put'
 import hitscheduling from '../../client/proyek/scheduling.get'
 import postscheduling from '../../client/proyek/scheduling.post'
 import deletescheduling from '../../client/proyek/scheduling.delete'
@@ -13,9 +13,7 @@ import deletescheduling from '../../client/proyek/scheduling.delete'
 import hitrab from '../../client/proyek/rab.get'
 import hitproyek from '../../client/proyek/proyek.get'
 import hitsdm from '../../client/sumberdaya/sdmanusia.get'
-import 'react-date-range/dist/styles.css'; // main css file
-import 'react-date-range/dist/theme/default.css'; // theme css file
-import { DateRangePicker, DateRange } from 'react-date-range'
+
 
 const Scheduling = () => {
     const namaUser = localStorage.getItem('namaUser') || null
@@ -31,7 +29,6 @@ const Scheduling = () => {
         }
     }
 
-
     // Get data Proyek
     const [dataProyek, setDataProyek] = useState([])
     const getProyek = async () => {
@@ -45,7 +42,6 @@ const Scheduling = () => {
 
     // Get data rab
     const [rab, setRab] = useState([])
-
     const getRab = async () => {
         const rabhit = await hitrab()
         if (rabhit.status = 200) {
@@ -200,7 +196,10 @@ const Scheduling = () => {
         })
     }
 
-    const [statusRAB, setStatusRAB] = useState({ status: 'On-Going' })
+    // Update Status Proyek 
+    const [updateProyek, setUpdateDataProyek] = useState({
+        status: 'Scheduling Dibuat'
+    })
 
     const handleSubmit = e => {
         e.preventDefault();
@@ -208,27 +207,33 @@ const Scheduling = () => {
         var groups1 = _.groupBy(scheduling, function (value) {
             return value.idRabProyek;
         });
-
         var data = _.map(groups1, function (group) {
             return {
+                namaProyek: group[0].idRabProyek.idProyek.namaProyek,
                 count: _.countBy(group, 'idRabProyek._id')
             }
         });
 
-
         const idRAB = formRAB.idRabProyek
+        const namaProyek = formRAB.namaProyek[0]
         let c = 0
-
         data.map(d1 => {
             return c = d1.count[idRAB]
         })
 
-        console.log({ data, idRAB, c })
+        let idProyek = ''
+        dataProyek.map(d1 => {
+            if (namaProyek === d1.namaProyek) {
+                return idProyek = d1._id
+            }
+        })
+        console.log(idProyek)
 
         if (c < 1 || c === undefined) {
             const idRAB = formRAB.idRabProyek
             const idMandor = formMandor.mandorProyek
             postscheduling(formdata, idRAB, idMandor)
+            putproyekstatus(idProyek, updateProyek)
 
             const Toast = Swal.mixin({
                 toast: true,
@@ -309,6 +314,46 @@ const Scheduling = () => {
         .toISOString()
         .split("T")[0];
 
+    const groupsSCH = _.groupBy(scheduling, function (value) {
+        return value._id + '#' + value.idRabProyek.idProyek.namaProyek;
+    });
+
+    const mapSCH = _.map(groupsSCH, function (group) {
+        return {
+            id: group[0]._id,
+            namaProyek: group[0].idRabProyek.idProyek.namaProyek,
+            sch: group[0].sch,
+            created_at: dateFormat(group[0].created_at, "dd mmmm yyyy")
+        }
+    });
+
+    const dataSch = _.flatMap(mapSCH, ({ id, namaProyek, sch, created_at }) =>
+        _.flatMap(sch, ({ uraianPekerjaan, tglKerja, bobotKegiatan, bobotPekerjaan, perkiraanDurasi, created_at }) => ({ id: id, namaProyek: namaProyek, uraian: uraianPekerjaan[0], tglKerja: tglKerja, bobotKegiatan: bobotKegiatan, bobotPekerjaan: bobotPekerjaan, perkiraanDurasi: perkiraanDurasi, created_at: created_at }))
+    )
+    console.log(dataSch)
+    const laporanSch = _.map(dataSch, function (group) {
+        return {
+            id: group.id,
+            namaProyek: group.namaProyek,
+            uraian: group.uraian,
+            tglKerja: dateFormat(group.tglKerja, "dd mmmm yyyy"),
+            bobotKegiatan: group.bobotKegiatan,
+            bobotPekerjaan: group.bobotPekerjaan,
+            perkiraanDurasi: group.perkiraanDurasi + ' hari',
+
+        }
+    });
+
+    const renderinfoScheduling = () => {
+        return laporanSch.map(sch => {
+            return (
+                <tr key={sch._id}>
+                    <td>{sch.uraian}</td>
+                    <td>{sch.perkiraanDurasi}</td>
+                </tr>
+            )
+        })
+    }
 
     useEffect(() => {
         getData()
@@ -393,8 +438,10 @@ const Scheduling = () => {
                                     className="btn btn-primary mr-2"
                                     type="submit" > Save </button>
                             </div>
-                        </form>
 
+                        </form>
+                        <br></br>
+                        <button type="button" className="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter">Info</button>
                     </div>
 
 
@@ -428,6 +475,35 @@ const Scheduling = () => {
                     </div>
                 </div>
             </div >
+
+            <div className="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                <div className="modal-dialog modal-dialog-centered" role="document">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h5 className="modal-title" id="exampleModalLongTitle">Info Lama Durasi Pengerjaan Proyek</h5>
+                            <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div className="modal-body">
+                            <p>Berikut adalah lama durasi pengerjaan pengerjaan proyek dari proyek yang sudah dibuat.</p>
+                            <table className="table table-bordered" id="info">
+                                <thead>
+                                    <tr>
+                                        <th width="50px">Uraian Pekerjaan</th>
+                                        <th>Lama Durasi /Hari</th>
+                                    </tr>
+                                </thead>
+                                <tbody>{renderinfoScheduling()}</tbody>
+                            </table>
+                        </div>
+                        <div className="modal-footer">
+                            <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     )
 }

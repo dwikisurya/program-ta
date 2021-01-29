@@ -10,9 +10,12 @@ import deleterab from '../../client/proyek/rab.delete'
 import postrab from '../../client/proyek/rab.post'
 
 import putrabstatus from '../../client/proyek/rab.status.put'
+import putrevisirabstatus from '../../client/proyek/rab.revisistatus.put'
 import putproyekstatus from '../../client/proyek/proyek.status.put'
 import hitproyek from '../../client/proyek/proyek.get'
 import hitpekerjaan from '../../client/sumberdaya/kegiatanproyek.get'
+import hitsdb from '../../client/sumberdaya/sdbarang.get'
+import hitsdm from '../../client/sumberdaya/sdmanusia.get'
 
 const RAB = () => {
     const namaUser = localStorage.getItem('namaUser') || null
@@ -39,18 +42,20 @@ const RAB = () => {
             idProyek: group[0].idProyek._id,
             namaProyek: group[0].idProyek.namaProyek,
             rab: group[0].rab,
-            status: group[0].status
+            status: group[0].status,
+            idSDB: group[0].idSDB.map(v => Object.values(v).join('_')).join(','),
+            idSDM: group[0].idSDM.map(v => Object.values(v).join('_')).join(',')
         }
     });
 
-    const huwala = _.flatMap(dataqq, ({ id, idProyek, namaProyek, rab, status, totalHarga }) =>
-        _.flatMap(rab, ({ uraianPekerjaan, idKegiatanProyek, totalHarga }) => ({ id: id, idProyek: idProyek, namaProyek: namaProyek, uraian: uraianPekerjaan, idKegiatanProyek: idKegiatanProyek, status: status, totalHarga: totalHarga }))
+    const huwala = _.flatMap(dataqq, ({ id, idProyek, namaProyek, rab, status, idSDB, idSDM }) =>
+        _.flatMap(rab, ({ uraianPekerjaan, idKegiatanProyek, totalHarga }) => ({ id: id, idProyek: idProyek, namaProyek: namaProyek, uraian: uraianPekerjaan, idKegiatanProyek: idKegiatanProyek, status: status, totalHarga: totalHarga, idSDB: idSDB, idSDM: idSDM }))
     )
-
-    const result = _.flatMap(huwala, ({ id, idProyek, namaProyek, uraian, idKegiatanProyek, status, totalHarga }) =>
-        _.map(idKegiatanProyek, tag => ({ id, idProyek, namaProyek, uraian, status, totalHarga, ...tag }))
+    console.log(huwala)
+    const result = _.flatMap(huwala, ({ id, idProyek, namaProyek, uraian, idKegiatanProyek, status, totalHarga, idSDB, idSDM }) =>
+        _.map(idKegiatanProyek, tag => ({ id, idProyek, namaProyek, uraian, status, totalHarga, idSDB, idSDM, ...tag }))
     );
-    console.log({ dataqq, huwala, result })
+
     // Populate Select For Proyek 
     const [dataProyek, setDataProyek] = useState([])
     const getProyek = async () => {
@@ -90,19 +95,70 @@ const RAB = () => {
             )
         })
     }
+    // Get Data SDB Form
+    const [dataSDB, setDataSDB] = useState([])
+    const getSDB = async () => {
+        const sdbq = await hitsdb()
+        if (sdbq.status === 200) {
+            setDataSDB(sdbq.data)
+        } else {
+            console.log('Error')
+        }
+    }
 
+    // Get Data SDM Form
+    const [sdmData, setsdmData] = useState([])
+    const getSDM = async () => {
+        const sdm = await hitsdm()
+        if (sdm.status === 200) {
+            setsdmData(sdm.data)
+        } else {
+            console.log(sdm)
+        }
+    }
+
+    const renderSDB = () => {
+        return dataSDB.map(sdbq => {
+            return (
+                <option key={sdbq._id} value={sdbq._id} name='sdb'>{sdbq.namaBarang}</option>
+            )
+        })
+    }
+
+    const renderSDM = () => {
+        return sdmData.map(sdmq => {
+            return (
+                <option key={sdmq._id} value={sdmq._id} name='sdm'>{sdmq.namaKaryawan}</option>
+            )
+        })
+    }
     // Form 
     const [formdata, setFormData] = useState([
         { uraianPekerjaan: '', idKegiatanProyek: {}, hargaKegiatan: {}, volume: '', totalHarga: '', grandTotal: '' }
     ]);
-
     const [updateProyek, setUpdateDataProyek] = useState({
         status: 'RAB Accepted'
     })
-
     const [updateRAB, setStatusRAB] = useState({ status: 'RAB Accepted' })
-
     const [formproyek, setFormProyek] = useState([])
+    const [barangdansdm, setbarangsdm] = useState([
+        { idSDM: {}, idSDB: {}, workhourSDM: {}, pcsSDB: {} }
+    ])
+
+    const handleSDMdanSDB = (index, event) => {
+        const values = [...barangdansdm]
+        if (event.target.name === "idSDM") {
+            values[index].idSDM = Array.from(event.target.selectedOptions, option => option.value)
+        } if (event.target.name === "idSDB") {
+            values[index].idSDB = Array.from(event.target.selectedOptions, option => option.value)
+        } if (event.target.name === "workhourSDM") {
+            values[index].workhourSDM = Array.from(event.target.value.split(',')) || 0
+        } if (event.target.name === "pcsSDB") {
+            values[index].pcsSDB = Array.from(event.target.value.split(',')) || 0
+        }
+        setbarangsdm(values)
+    }
+
     const handlerChange = (e) => {
         setFormProyek(formdata => ({ ...formdata, [e.target.name]: e.target.value }))
     }
@@ -168,12 +224,17 @@ const RAB = () => {
             return c = d1.count[b]
         })
 
+        const inputsdm = barangdansdm[0].idSDM
+        const inputsdb = barangdansdm[0].idSDB
+        const inputworkhour = barangdansdm[0].workhourSDM
+        const inputpcssdb = barangdansdm[0].pcsSDB
+
         if (formdata !== null && formproyek !== null && c < 1 || c === undefined) {
             let total = 0
             for (let i = 0; i < formdata.length; i++) {
                 total += formdata[i].totalHarga
             }
-            postrab(formdata, idform, total, namaUser)
+            postrab(formdata, idform, total, namaUser, inputsdm, inputsdb, inputworkhour, inputpcssdb)
             console.log(idform)
             const Toast = Swal.mixin({
                 toast: true,
@@ -223,10 +284,11 @@ const RAB = () => {
         values.splice(index, 1);
         setFormData(values);
     };
-
+    console.log(result)
     // Update Status Proyek
     const updateStatus = (e, id, idproyek) => {
         if (role === 'direktur') {
+            console.log(id, updateRAB)
             putrabstatus(id, updateRAB)
                 .then(res => {
                     const Toast = Swal.mixin({
@@ -245,6 +307,7 @@ const RAB = () => {
                         title: `RAB id: ` + id + `berhasil di accept!`
                     })
                     putproyekstatus(idproyek, updateProyek)
+                    getData()
                     // window.location = '/proyek/rab'
                 })
 
@@ -266,6 +329,31 @@ const RAB = () => {
             })
         }
     }
+    const [revisiRAB, setrevisiRAB] = useState({ status: 'kurang' })
+    const revisiStatus = (e, id, idproyek) => {
+        Swal.fire({
+            title: 'Alasan RAB Tidak Disetujui',
+            input: 'text',
+            inputAttributes: {
+                autocapitalize: 'off'
+            },
+            showCancelButton: true,
+            confirmButtonText: 'Simpan',
+            showLoaderOnConfirm: true,
+            preConfirm: (statusQ) => {
+                putrevisirabstatus(id, statusQ)
+            },
+            allowOutsideClick: () => !Swal.isLoading()
+        }).then((result) => {
+            if (result.isConfirmed) {
+                getData()
+                Swal.fire({
+                    title: 'Berhasil disimpan',
+                })
+            }
+        })
+    }
+
 
     // Delete
     const deleteRow = (id, e) => {
@@ -297,6 +385,8 @@ const RAB = () => {
         getData()
         getProyek()
         getPekerjaan()
+        getSDM()
+        getSDB()
     }, [])
 
     return (
@@ -314,6 +404,62 @@ const RAB = () => {
                                     <option value="">     </option>
                                     {renderProyek()}
                                 </select>
+                                {barangdansdm.map((bsq, index) => (
+                                    <Fragment key={`${bsq}~${index}`}>
+                                        <div className="form-group col-sm-6">
+                                            <label htmlFor="volume">Tim Untuk Bekerja</label>
+                                            <select multiple class="form-control" id="idSDM" name="idSDM" onChange={event => handleSDMdanSDB(index, event)}>
+                                                {renderSDM()}
+                                            </select>
+                                            <label htmlFor="volume">Barang Dibutuhkan</label>
+                                            <select multiple class="form-control" id="idSDB" name="idSDB" onChange={event => handleSDMdanSDB(index, event)}>
+                                                {renderSDB()}
+                                            </select>
+                                        </div>
+
+                                        <div className="form-group col-sm-6">
+                                            <div>
+                                                <label htmlFor="volume">Durasi Bekerja /Hari</label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    id="workhourSDM"
+                                                    name="workhourSDM"
+                                                    onChange={event => handleSDMdanSDB(index, event)}
+                                                    required
+                                                />
+                                            </div>
+                                            <div>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    disabled
+                                                    style={{ visibility: 'hidden' }}
+                                                />
+                                            </div>
+                                            <div>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    disabled
+                                                    style={{ visibility: 'hidden' }}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label htmlFor="volume">Jumlah /pcs</label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    id="pcsSDB"
+                                                    name="pcsSDB"
+                                                    onChange={event => handleSDMdanSDB(index, event)}
+                                                    required
+                                                />
+                                            </div>
+                                            <div></div>
+                                        </div>
+                                    </Fragment>
+                                ))}
 
                                 {formdata.map((formdataq, index) => (
                                     <Fragment key={`${formdataq}~${index}`}>
@@ -367,9 +513,6 @@ const RAB = () => {
                                 <button
                                     className="btn btn-primary mr-2"
                                     type="submit"> Save</button>
-
-
-
                             </div>
                         </form>
                     </div>
@@ -386,6 +529,9 @@ const RAB = () => {
                                     title: "Nama Kegiatan", field: "namaKegiatan",
                                 },
                                 { title: "Total", field: "totalHarga" },
+                                { title: "Status", field: "status" },
+                                { title: "Tim SDM Ditunjuk", field: "idSDM" },
+                                { title: "SDB Dibutuhkan", field: "idSDB" },
                                 {
                                     title: "Edit",
                                     field: "internal_action",
@@ -395,7 +541,7 @@ const RAB = () => {
                                         rowData && (
                                             <td><ModalRAB rowData={rowData} /></td>
                                         )
-                                }
+                                },
                             ]}
                             data={(result)}
                             options={{
@@ -407,17 +553,21 @@ const RAB = () => {
                                     tooltip: 'Delete Data',
                                     onClick: (e, rowData) => deleteRow(rowData.id, e)
                                 },
-
                                 {
-
                                     icon: 'check',
                                     tooltip: 'Accept RAB',
                                     onClick: (e, rowData) => updateStatus(e, rowData.id, rowData.idProyek)
-                                }
+                                },
+                                {
+                                    icon: 'error',
+                                    tooltip: 'Revisi Status',
+                                    onClick: (e, rowData) => revisiStatus(e, rowData.id, rowData.idProyek)
+                                },
                             ]}
                             options={{
                                 actionsColumnIndex: -1
                             }}
+
                         />
                     </div>
                 </div>

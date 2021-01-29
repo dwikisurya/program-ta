@@ -8,6 +8,7 @@ const proyek = require('./proyek')
 const rabproyek = require('./rab')
 const scheduling = require('./scheduling')
 const perkembangan = require('./perkembanganproyek')
+const pelaporantrouble = require('./pelaporantrouble')
 
 router.get('/', (req, res) => {
     res.send('homepage')
@@ -22,5 +23,6 @@ router.use('/proyek', proyek)
 router.use('/rab', rabproyek)
 router.use('/scheduling', scheduling)
 router.use('/perkembangan', perkembangan)
+router.use('/pelaporantrouble', pelaporantrouble)
 
 module.exports = router

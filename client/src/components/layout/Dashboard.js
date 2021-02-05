@@ -273,6 +273,21 @@ const Dashboard = () => {
         }
     }
 
+    const groupsTrouble = _.groupBy(pelaporanTrouble, function (value) {
+        return value._id + '#' + value.namaProyek;
+    });
+
+
+    const dataTrouble = _.map(groupsTrouble, function (group) {
+        return {
+            namaProyek: group[0].namaProyek,
+            idPelaporan: group[0].idPelaporan,
+            uraian: group[0].uraian,
+            date: dateFormat(group[0].created_at, "dd mmm yyyy HH:MM"),
+            posted_by: group[0].posted_by
+        }
+    });
+
     // Pelaporan Trouble
     const revisiTrouble = (e, id, namaproyek) => {
         if (role === "pm") {
@@ -286,10 +301,9 @@ const Dashboard = () => {
                 confirmButtonText: 'Simpan',
                 showLoaderOnConfirm: true,
                 preConfirm: (statusQ) => {
-                    pelaporanTrouble.map(ptrouble => {
-                        if (id != ptrouble.idPelaporan)
-                            postpelaporantrouble(id, namaproyek, statusQ, namaUser)
-                    })
+                    postpelaporantrouble(id, namaproyek, statusQ, namaUser)
+
+
                 },
                 allowOutsideClick: () => !Swal.isLoading()
             }).then((result) => {
@@ -372,10 +386,10 @@ const Dashboard = () => {
                                         { title: "Id Pelaporan", field: "idPelaporan" },
                                         { title: "Nama Proyek", field: "namaProyek", defaultGroupOrder: 1 },
                                         { title: "Uraian", field: "uraian" },
-                                        { title: "Date", field: "created_at", defaultSort: 'desc' },
+                                        { title: "Date", field: "date", defaultSort: 'desc' },
                                         { title: "Posted", field: "posted_by" },
                                     ]}
-                                    data={(pelaporanTrouble)}
+                                    data={(dataTrouble)}
                                     options={{
                                         grouping: true,
                                         paging: true,

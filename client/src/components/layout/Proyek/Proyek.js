@@ -150,7 +150,7 @@ const Proyek = () => {
                 Toast.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: 'Harap isi Field yang kosong',
+                    text: `Project Manager` + hcpm.namaPM + ` sudah menangani 2 proyek`,
                 })
             } else {
                 postproyek(formdata)
@@ -297,6 +297,7 @@ const Proyek = () => {
                         </div>
                         <div className="modal-body">
                             <p>Jumlah proyek yang dihitung tidak meliputi Proyek yang sudah selesai dan Proyek yang di cancel</p>
+                            <p>PM yang sudah dihitung adalah PM yang sudah pernah melakukan penyelesaian proyek.</p>
                             <table className="table table-bordered" id="info">
                                 <thead>
                                     <tr>

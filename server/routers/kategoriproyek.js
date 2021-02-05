@@ -4,7 +4,7 @@ const router = require('.')
 
 const kategoriproyek = require('express').Router()
 const KategoriController = require('../controllers/KategoriController')
-const Authentication = require('../middlewares/authentication')
+
 
 /*
 Router.get / .post / .delete / .patch / .put

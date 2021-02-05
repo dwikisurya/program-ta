@@ -6,6 +6,7 @@ import jsPDF from 'jspdf'
 import hitpelaporan from '../../client/proyek/perkembangan.get'
 import hitproyek from '../../client/proyek/proyek.get'
 import hitrab from '../../client/proyek/rab.get'
+import hitbiaya from '../../client/sumberdaya/biayarole.get'
 
 const LaporanSumberDaya = () => {
 
@@ -44,7 +45,7 @@ const LaporanSumberDaya = () => {
     const renderProyek = () => {
         return proyek.map(proyekq => {
             return resultPersentase.map(r1 => {
-                if (proyekq.namaProyek === r1.namaProyek && r1.total === '100') {
+                if (proyekq.namaProyek === r1.namaProyek) {
                     return (
                         <option key={proyekq._id} value={proyekq.namaProyek} name={proyekq.namaProyek}>{proyekq.namaProyek}</option>
                     )
@@ -57,6 +58,7 @@ const LaporanSumberDaya = () => {
         return value._id
     });
 
+
     var result = _.map(groups1, function (group) {
         return {
             idSchedulingProyek: group[0].idSchedulingProyek,
@@ -68,7 +70,7 @@ const LaporanSumberDaya = () => {
     });
 
     const dataSDM = _.flatMap(result, ({ idSchedulingProyek, namaProyek, idSDB, idSDM, created_at }) =>
-        _.flatMap(idSDM, ({ namaKaryawan }) => ({ idSchedulingProyek: idSchedulingProyek, namaProyek: namaProyek, namaKaryawan: namaKaryawan, idSDM: idSDM, created_at: created_at }))
+        _.flatMap(idSDM, ({ namaKaryawan, status }) => ({ idSchedulingProyek: idSchedulingProyek, namaProyek: namaProyek, namaKaryawan: namaKaryawan, idSDM: idSDM, created_at: created_at, status: status }))
     )
     var groupSDM = _.groupBy(dataSDM, function (value) {
         return value.namaKaryawan + '#' + value.namaProyek
@@ -78,6 +80,7 @@ const LaporanSumberDaya = () => {
         return {
             namaProyek: group[0].namaProyek,
             namaKaryawan: group[0].namaKaryawan,
+            status: group[0].status,
             totalCount: _.countBy(group, Math.floor()),
         }
     });
@@ -122,17 +125,65 @@ const LaporanSumberDaya = () => {
             id: group[0]._id,
             namaProyek: group[0].idProyek.namaProyek,
             idSDM: group[0].idSDM,
-            workhourSDM: group[0].workhourSDM
-        }
-    });
-    const indexsdm = _.map(groups2, function (group) {
-        return {
-            idSDM: group[0].idSDM,
+            workhourSDM: group[0].workhourSDM,
+            idSDB: group[0].idSDB,
+            pcsSDB: group[0].pcsSDB,
+            jabatan: group[0].jabatan
         }
     });
 
-    // let a = _.findIndex(flatSDM, function (o) { return o.namaKaryawan ===  });
-    //console.log(indexworkhour[0].workhourSDM[1])
+
+    // State Biaya
+    const [biayarole, setbiayaroleData] = useState([])
+    const getBiaya = async () => {
+        const biaya = await hitbiaya()
+        if (biaya.status === 200) {
+            setbiayaroleData(biaya.data)
+        } else {
+            console.log(biaya)
+        }
+    }
+
+    // Set Harga Value Dari Role
+    let hargapm = 0
+    let hargamandor = 0
+    let hargaadministrasi = 0
+    biayarole.map(br => {
+        if (br.namaRole === 'pm') {
+            return hargapm = br.hargaBiaya
+        } if (br.namaRole === 'mandor') {
+            return hargamandor = br.hargaBiaya
+        } if (br.namaRole === 'administrasi') {
+            return hargaadministrasi = br.hargaBiaya
+        }
+    })
+    let flatsdmdq = []
+    let flatjabatanq = []
+    let flatworkhourq = []
+    dataqq.map(dq => {
+        if (dq.namaProyek === formData.namaProyek) {
+            dq.idSDM.map(dqsdm => {
+                flatsdmdq.push(dqsdm.namaKaryawan)
+            })
+        }
+    })
+    dataqq.map(dq => {
+        if (dq.namaProyek === formData.namaProyek) {
+            dq.jabatan.map(dqsdm => {
+                flatjabatanq.push(dqsdm)
+            })
+        }
+    })
+    dataqq.map(dq => {
+        if (dq.namaProyek === formData.namaProyek) {
+            dq.workhourSDM.map(dqsdm => {
+                flatworkhourq.push(dqsdm)
+            })
+        }
+    })
+    const resgabung = flatsdmdq.map((e, i) => [{ namaKaryawan: e, jabatan: flatjabatanq[i] }])
+    const resworkhourq = flatworkhourq.map((e, i) => [{ namaKaryawan: flatsdmdq[i], workhourSDM: e }])
+
 
     const rendertableSDM = () => {
         return laporanSDM.map(sdmq => {
@@ -149,14 +200,128 @@ const LaporanSumberDaya = () => {
 
     const rendertableSDMWokrHour = () => {
         return dataqq.map(dq => {
-            return dq.idSDM.map(sdmq => {
-                return laporanSDM.map(ls => {
-                    if (ls.namaProyek === dq.namaProyek && ls.namaKaryawan === sdmq.namaKaryawan) {
+            if (dq.namaProyek === formData.namaProyek) {
+                return dq.idSDM.map((sdmq, indexworkhousrsdm) => {
+                    return laporanSDM.map(ls => {
+                        return resgabung.map(rs => {
+                            if (ls.namaKaryawan === sdmq.namaKaryawan && ls.namaProyek === dq.namaProyek && rs[0].namaKaryawan === ls.namaKaryawan) {
+                                return (
+                                    <tr>
+                                        <td>{sdmq.namaKaryawan}</td>
+                                        <td>{rs[0].jabatan}</td>
+                                        <td>{ls.totalCount[undefined] * dq.workhourSDM[indexworkhousrsdm] + ' Jam'}</td>
+
+                                    </tr>
+                                )
+                            }
+
+                        })
+                    })
+                })
+            }
+        })
+    }
+
+
+    const rendertableBiayaSDMWokrHour = () => {
+        return dataqq.map(dq => {
+            if (dq.namaProyek === formData.namaProyek) {
+                return dq.idSDM.map((dqsdm, indexdqsdm) => {
+                    return laporanSDM.map(ls => {
+                        if (ls.namaKaryawan === dqsdm.namaKaryawan) {
+                            return resgabung.map(rs => {
+                                if (rs[0].namaKaryawan === dqsdm.namaKaryawan) {
+                                    return biayarole.map(br => {
+                                        if (br.namaRole === rs[0].jabatan) {
+                                            return (
+                                                <tr>
+                                                    <td>{dqsdm.namaKaryawan}</td>
+                                                    <td>{rs[0].jabatan}</td>
+                                                    <td>{(ls.totalCount[undefined] * dq.workhourSDM[indexdqsdm])}</td>
+                                                    <td>{(ls.totalCount[undefined] * dq.workhourSDM[indexdqsdm]) * br.hargaBiaya}</td>
+                                                </tr>
+                                            )
+                                        }
+                                    })
+
+                                }
+                            })
+                        }
+                    })
+                })
+            }
+        })
+    }
+
+    let testFlatdq = []
+    let testFlatsdm = []
+    let lodash = require("lodash");
+    dataqq.map(dq => {
+        if (dq.namaProyek === formData.namaProyek) {
+            dq.idSDM.map(dqsdm => {
+                testFlatdq.push(dqsdm.namaKaryawan)
+            })
+        }
+    })
+    laporanSDM.map(ls => {
+        if (ls.namaProyek === formData.namaProyek) {
+            testFlatsdm.push(ls.namaKaryawan)
+        }
+    })
+
+    let newArray = lodash.difference(testFlatsdm, testFlatdq)
+    const datanewarray = _.map(newArray, function (group) {
+        return {
+            namaKaryawan: group
+        }
+    });
+
+    const rendertabletdkSDM = () => {
+        return laporanSDM.map(sdmq => {
+            return datanewarray.map(dr => {
+                if (sdmq.namaProyek === formData.namaProyek && sdmq.namaKaryawan === dr.namaKaryawan) {
+                    return (
+                        <tr key={sdmq.id}>
+                            <td>{sdmq.namaKaryawan}</td>
+                            <td>{sdmq.totalCount[undefined] + ` Jam`}</td>
+                        </tr>
+                    )
+                }
+            })
+        })
+    }
+
+    const rendertabletdkSDMWorkHour = () => {
+        return laporanSDM.map(sdmq => {
+            return datanewarray.map(dr => {
+                if (sdmq.namaProyek === formData.namaProyek && sdmq.namaKaryawan === dr.namaKaryawan) {
+                    return resgabung.map(rs => {
+                        if (rs.namaKaryawan === sdmq.namaKaryawan) {
+                            return (
+                                <tr key={sdmq.id}>
+                                    <td>{sdmq.namaKaryawan}</td>
+                                    <td>{rs.jabatan}</td>
+                                    <td>{sdmq.totalCount[undefined] + ` Jam`}</td>
+                                </tr>
+                            )
+                        }
+                    })
+                }
+            })
+        })
+    }
+
+
+    const rendertableSDBpcsSDB = () => {
+        return dataqq.map(dq => {
+            return dq.idSDB.map(sdbq => {
+                return laporanSDB.map(ls => {
+                    if (ls.namaProyek === dq.namaProyek && ls.namaBarang === sdbq.namaBarang) {
                         return (
                             <tr>
-                                <td>{ls.namaKaryawan}</td>
-                                {dq.workhourSDM.map(nm => {
-                                    return <td>{ls.totalCount[undefined] * nm + ' Jam'}</td>
+                                <td>{ls.namaBarang}</td>
+                                {dq.pcsSDB.map(nm => {
+                                    return <td>{ls.totalCount[undefined] - nm + ' pcs'}</td>
                                 })}
                             </tr>
                         )
@@ -201,12 +366,17 @@ const LaporanSumberDaya = () => {
 
         doc.autoTable({
             startY: finalY + 30,
-            html: '#SDM',
+            html: '#rendertabletdkSDM',
             useCss: true,
             didDrawPage: header
         })
+        // doc.autoTable({
+        //     html: '#rendertabletdkSDMWorkHour',
+        //     useCss: true,
+        //     didDrawPage: header
+        // })
         doc.autoTable({
-            html: '#workHour',
+            html: '#biayaKerja',
             useCss: true,
             didDrawPage: header
         })
@@ -219,6 +389,10 @@ const LaporanSumberDaya = () => {
         const doc = new jsPDF()
         const finalY = doc.lastAutoTable.finalY || 10
         const namaProyek = `SDB Proyek : ` + formData.namaProyek
+        const header = function () {
+            doc.setFontSize(13);
+
+        };
 
         const today = new Date();
         const date = today.getDate() + '-' + (today.getMonth() + 1) + '-' + today.getFullYear()
@@ -234,14 +408,22 @@ const LaporanSumberDaya = () => {
             startY: finalY + 30,
             html: '#SDB',
             useCss: true,
+            didDrawPage: header
+        })
+        doc.autoTable({
+            html: '#pcsSDB',
+            useCss: true,
+            didDrawPage: header
         })
         doc.save(`SDB ` + formData.namaProyek + `.pdf`)
     }
+
 
     useEffect(() => {
         getData()
         getProyek()
         getRAB()
+        getBiaya()
     }, [])
 
     return (
@@ -285,21 +467,79 @@ const LaporanSumberDaya = () => {
                     </table>
                     <button type="button" class="btn btn-primary" onClick={() => exportPDFSDB()}>Download</button>
                 </div>
-                <div className="col-md-5" style={{ visibility: 'hidden', height: 0, width: 0 }}>
-                    <h5>Sumber Daya Manusia</h5>
+
+                <div className="col-md-5">
+                    <h5>SDM Wokrhour</h5>
                     <table className="table table-bordered" id="workHour">
                         <thead>
                             <tr>
                                 <th>SDM Di RAB</th>
+                                <th>Jabatan di Proyek</th>
                                 <th>Work Hour/Jam</th>
                             </tr>
                         </thead>
                         <tbody>{rendertableSDMWokrHour()}</tbody>
                     </table>
-                    <button type="button" class="btn btn-primary" onClick={() => exportPDFSDM()}>Download</button>
                 </div>
 
-            </div>
+                <div className="col-md-5"  >
+                    <h5>Harga Biaya</h5>
+                    <table className="table table-bordered" id="biayaKerja">
+                        <thead>
+                            <tr>
+                                <th>SDM bekerja di RAB</th>
+                                <th>Jabatan</th>
+                                <th>Total WorkHour</th>
+                                <th>Harga Biaya</th>
+                            </tr>
+                        </thead>
+                        <tbody>{rendertableBiayaSDMWokrHour()}</tbody>
+                    </table>
+                </div>
+
+                <div className="col-md-5" >
+                    <h5>Sumber Daya Barang</h5>
+                    <table className="table table-bordered" id="pcsSDB">
+                        <thead>
+                            <tr>
+                                <th>SDB Di RAB</th>
+                                <th>Sisa Jumlah Barang /pcs</th>
+                            </tr>
+                        </thead>
+                        <tbody>{rendertableSDBpcsSDB()}</tbody>
+                    </table>
+                    <button type="button" class="btn btn-primary">Download</button>
+                </div>
+
+                <div className="col-md-5" >
+                    <h5>Work Hour tdk di RAB</h5>
+                    <table className="table table-bordered" id="rendertabletdkSDM">
+                        <thead>
+                            <tr>
+                                <th>SDM Bekerja tdk di RAB</th>
+                                <th>Work Hour /jam</th>
+                            </tr>
+                        </thead>
+                        <tbody>{rendertabletdkSDM()}</tbody>
+                    </table>
+                    <button type="button" class="btn btn-primary">Download</button>
+                </div>
+
+                <div className="col-md-5" >
+                    <h5>Nama Tidak di RAB</h5>
+                    <table className="table table-bordered" id="rendertabletdkSDMWorkHour">
+                        <thead>
+                            <tr>
+                                <th>SDM Bekerja tdk di RAB</th>
+                                <th>Biaya Kerja</th>
+                            </tr>
+                        </thead>
+                        <tbody>{rendertabletdkSDMWorkHour()}</tbody>
+                    </table>
+                    <button type="button" class="btn btn-primary">Download</button>
+                </div>
+
+            </div >
 
 
 

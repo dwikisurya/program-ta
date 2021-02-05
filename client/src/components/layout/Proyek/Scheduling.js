@@ -150,12 +150,29 @@ const Scheduling = () => {
         const values = [...formdata];
         let i = 0
         let j = 0
+        const indexx = event.target.selectedIndex;
+        const optionElement = event.target.childNodes[indexx]
+
         if (event.target.name === "uraianPekerjaan") {
-            values[index].uraianPekerjaan = Array.from(event.target.selectedOptions, option => option.value)
-            let tempHargaKegiatan = Array.from(event.target.selectedOptions, option => parseFloat(option.attributes.getNamedItem("data-valuea").value).toFixed(2))
-            let grandTotal = Array.from(event.target.selectedOptions, option => parseFloat(option.attributes.getNamedItem("data-valuec").value).toFixed(2))
-            let zxc = (tempHargaKegiatan / grandTotal) * 100
-            values[index].bobotKegiatan = zxc
+            console.log(event)
+            console.log(optionElement)
+            const uraianPekerjaan = optionElement.getAttribute('label')
+            values[index].uraianPekerjaan = uraianPekerjaan
+            //  data-biaya={dq.biaya} data-volume={dq.volume} data-grandtotal={dq.grandTotal} data-totalharga={dq.totalharga} 
+            // Harga Individu Kegiatan
+            const optionhargakegiatan = optionElement.getAttribute('data-biaya')
+            let tempHargaKegiatan = optionhargakegiatan
+
+            // Ambil Volume Untuk dikali harga individu
+            const optionvolumekegiatan = optionElement.getAttribute('data-volume')
+            let tempVolume = optionvolumekegiatan
+
+            // Ambil Harga Grandtotal
+            const optionhargagrandtotal = optionElement.getAttribute('data-grandtotal')
+            let tempgrandtotal = parseFloat(optionhargagrandtotal)
+
+            let bobotkegiatan = ((tempHargaKegiatan * tempVolume) / tempgrandtotal) * 100
+            values[index].bobotKegiatan = bobotkegiatan.toFixed(1)
 
         } if (event.target.name === "tglKerja") {
             values[index].tglKerja = event.target.value
@@ -165,8 +182,8 @@ const Scheduling = () => {
 
         i = values[index].perkiraanDurasi
         j = values[index].bobotKegiatan
-        values[index].bobotPekerjaan = (j / i)
-
+        const bobotpekerjaan = (j / i)
+        values[index].bobotPekerjaan = bobotpekerjaan.toFixed(1)
         setFormData(values)
     }
 
@@ -196,6 +213,71 @@ const Scheduling = () => {
         })
     }
 
+    let flatnamakegiatan = []
+    rab.map(rabq => {
+        if (rabq._id === formRAB.idRabProyek) {
+            rabq.rab.map(rabqq => {
+                rabqq.idKegiatanProyek.map(rik => {
+                    flatnamakegiatan.push(rik.namaKegiatan)
+                })
+            })
+        }
+    })
+
+    let flatvolume = []
+    rab.map(rabq => {
+        if (rabq._id === formRAB.idRabProyek) {
+            rabq.rab.map(rabqq => {
+                rabqq.volume.map(rv => {
+                    flatvolume.push(rv)
+                })
+            })
+        }
+    })
+    let flatbiaya = []
+    rab.map(rabq => {
+        if (rabq._id === formRAB.idRabProyek) {
+            rabq.rab.map(rabqq => {
+                rabqq.hargaKegiatan.map(hk => {
+                    flatbiaya.push(hk)
+                })
+            })
+        }
+    })
+    let flatnamakegiatandanuraian = []
+    rab.map(rabq => {
+        if (rabq._id === formRAB.idRabProyek) {
+            rabq.rab.map(rabqq => {
+                rabqq.idKegiatanProyek.map(rik => {
+                    flatnamakegiatandanuraian.push({ uraian: rabqq.uraianPekerjaan, namakegiatan: rik.namaKegiatan, totalHarga: rabqq.totalHarga, id: rabq._id, grandtotal: rabq.grandTotal })
+                })
+            })
+        }
+    })
+    const testgabung = flatnamakegiatandanuraian.map((e, i) => [{ id: e.id, uraian: e.uraian, namakegiatan: e.namakegiatan, volume: flatvolume[i], biaya: flatbiaya[i], totalHarga: e.totalHarga, grandtotal: e.grandtotal }])
+    const datagabungan = _.map(testgabung, function (group) {
+        return {
+            id: group[0].id,
+            uraian: group[0].uraian,
+            namaKegiatan: group[0].namakegiatan,
+            volume: group[0].volume,
+            biaya: group[0].biaya,
+            totalharga: group[0].totalHarga,
+            grandtotal: group[0].grandtotal
+        }
+    })
+
+    // Populate Dropdown Uraian Pekerjaan untuk form
+    const renderUraianRinci = () => {
+        return datagabungan.map((dq, index) => {
+            if (dq.id === formRAB.idRabProyek) {
+                return (
+                    <option key={index} value={dq.namakegiatan} data-biaya={dq.biaya} data-volume={dq.volume} data-grandtotal={dq.grandtotal} data-totalharga={dq.totalharga} label={dq.uraian + ` - ` + dq.namaKegiatan}></option>
+                )
+            }
+        })
+    }
+
     // Update Status Proyek 
     const [updateProyek, setUpdateDataProyek] = useState({
         status: 'Scheduling Dibuat'
@@ -203,7 +285,6 @@ const Scheduling = () => {
 
     const handleSubmit = e => {
         e.preventDefault();
-
         var groups1 = _.groupBy(scheduling, function (value) {
             return value.idRabProyek;
         });
@@ -309,6 +390,7 @@ const Scheduling = () => {
             return durasiPengerjaan = p1.durasiPengerjaan
         }
     })
+
     let durasiAkhir = durasiPengerjaan * (1000 * 3600 * 24)
     const dateAkhir = new Date(date.getTime() - (date.getTimezoneOffset() * 60000) + durasiAkhir)
         .toISOString()
@@ -330,7 +412,7 @@ const Scheduling = () => {
     const dataSch = _.flatMap(mapSCH, ({ id, namaProyek, sch, created_at }) =>
         _.flatMap(sch, ({ uraianPekerjaan, tglKerja, bobotKegiatan, bobotPekerjaan, perkiraanDurasi, created_at }) => ({ id: id, namaProyek: namaProyek, uraian: uraianPekerjaan[0], tglKerja: tglKerja, bobotKegiatan: bobotKegiatan, bobotPekerjaan: bobotPekerjaan, perkiraanDurasi: perkiraanDurasi, created_at: created_at }))
     )
-    console.log(dataSch)
+
     const laporanSch = _.map(dataSch, function (group) {
         return {
             id: group.id,
@@ -348,6 +430,7 @@ const Scheduling = () => {
         return laporanSch.map(sch => {
             return (
                 <tr key={sch._id}>
+                    <td>{sch.namaProyek}</td>
                     <td>{sch.uraian}</td>
                     <td>{sch.perkiraanDurasi}</td>
                 </tr>
@@ -368,7 +451,7 @@ const Scheduling = () => {
             <Navbar />
             <div className="container-fluid">
                 <div className="row clearfix" style={{ margin: 10 }}>
-                    <div className="col-md-5">
+                    <div className="col-md-7">
                         <h5>Input Scheduling</h5>
                         <form onSubmit={handleSubmit}>
                             <div className="form-row">
@@ -389,7 +472,7 @@ const Scheduling = () => {
                                             <label htmlFor="volume">Uraian Pekerjaan</label>
                                             <select className="form-control" id="uraianPekerjaan" name="uraianPekerjaan" onChange={event => handleInputChange(index, event)}>
                                                 <option value="">     </option>
-                                                {renderUraian()}
+                                                {renderUraianRinci()}
                                             </select>
                                         </div>
 
@@ -442,11 +525,12 @@ const Scheduling = () => {
                         </form>
                         <br></br>
                         <button type="button" className="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter">Info</button>
+
                     </div>
 
 
 
-                    <div className="col-md-7">
+                    <div className="col-md-5">
                         <MaterialTable
                             title="Data Scheduling"
                             columns={[
@@ -477,7 +561,7 @@ const Scheduling = () => {
             </div >
 
             <div className="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-                <div className="modal-dialog modal-dialog-centered" role="document">
+                <div className="modal-dialog modal-dialog-centered modal-xl" role="document">
                     <div className="modal-content">
                         <div className="modal-header">
                             <h5 className="modal-title" id="exampleModalLongTitle">Info Lama Durasi Pengerjaan Proyek</h5>
@@ -490,6 +574,7 @@ const Scheduling = () => {
                             <table className="table table-bordered" id="info">
                                 <thead>
                                     <tr>
+                                        <th width="50px">Nama Proyek</th>
                                         <th width="50px">Uraian Pekerjaan</th>
                                         <th>Lama Durasi /Hari</th>
                                     </tr>

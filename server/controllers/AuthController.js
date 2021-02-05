@@ -6,7 +6,6 @@ const bcrypt = require('bcryptjs')
 module.exports = class AuthController {
 
     static register(req, res) {
-
         const userName = req.body.namaKaryawan
         const role = req.body.status
         const password1 = userName.replace(/\s+/g, '')
@@ -33,8 +32,7 @@ module.exports = class AuthController {
         validateemail(email)
     }
 
-
-    static login(req, res) {
+     static login(req, res) {
         const { email: inputtedEmail, password } = req.body
 
         User.findOne({
@@ -60,7 +58,8 @@ module.exports = class AuthController {
         }).catch(err => {
             res.status(500).json(err)
         })
-
-
     }
+
+
+
 }

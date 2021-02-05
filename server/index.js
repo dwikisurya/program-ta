@@ -20,7 +20,7 @@ const mongooseOptions = {
 mongoose.connect(MONGOOSEURI, mongooseOptions)
 const db = mongoose.connection
 db.once('open', () => {
-    console.log('Connected to mongoDB @', MONGOOSEURI)
+    console.log('Connected to mongoDB')
 })
 
 

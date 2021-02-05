@@ -101,10 +101,7 @@ module.exports = class PerkembanganController {
                 console.log(err)
                 res.status(500).send(err);
             }
-            else {
-                console.log("success");
-                res.send(docs)
-            }
+
         })
     }
 

@@ -1,20 +1,19 @@
-const kategoriProyek = require('../models/kategoriProyek')
+const biayaRole = require('../models/biayaRole')
 const { json } = require('body-parser')
 const jwt = require('jsonwebtoken')
 
-
-module.exports = class KategoriController {
+module.exports = class BiayaController {
 
     // Tambah Data
     static tambah(req, res) {
-        const namakategori = req.body.namaKategori
-        const deskripsikategori = req.body.deskripsiKategori
+        const namarole = req.body.namaRole
+        const hargabiaya = req.body.hargaBiaya
         const created_at = Date.now()
         const updated_at = Date.now()
 
-        kategoriProyek.create({
-            namaKategori: namakategori,
-            deskripsiKategori: deskripsikategori,
+        biayaRole.create({
+            namaRole: namarole,
+            hargaBiaya: hargabiaya,
             created_at: created_at,
             updated_at: updated_at
         }).then((result) => {
@@ -28,7 +27,7 @@ module.exports = class KategoriController {
     static delete(req, res) {
         const id = req.params.id
 
-        kategoriProyek.findByIdAndDelete(id)
+        biayaRole.findByIdAndDelete(id)
             .exec()
             .then((result) => {
                 res.status(303).json({ msg: 'Data Berhasil Dihapus' })
@@ -44,11 +43,11 @@ module.exports = class KategoriController {
 
         const dataupdate = {
             namaKategori: req.body.namaKategori,
-            deskripsiKategori: req.body.deskripsiKategori,
+            hargaBiaya: req.body.hargaBiaya,
             updated_at: updated_at
         }
 
-        kategoriProyek.findByIdAndUpdate(id, dataupdate, { new: true }, function (err, docs) {
+        biayaRole.findByIdAndUpdate(id, dataupdate, { new: true }, function (err, docs) {
             if (err) {
                 res.status(500).send(err)
             } else {
@@ -59,8 +58,7 @@ module.exports = class KategoriController {
 
     // Baca Semua Data
     static read(req, res) {
-        kategoriProyek.find({
-
+        biayaRole.find({
         }).then((result) => {
             res.status(200).json(result)
         }).catch((err) => {
@@ -68,15 +66,5 @@ module.exports = class KategoriController {
         })
     }
 
-    static readOne(req, res) {
-        const id = req.params.id
 
-        kategoriProyek.findById(id)
-            .exec()
-            .then((result) => {
-                res.status(200).json(result)
-            }).catch((err) => {
-                res.status(500).json(err)
-            })
-    }
 }

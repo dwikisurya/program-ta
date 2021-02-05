@@ -3,7 +3,7 @@ const router = require('.')
 
 const kegiatanproyek = require('express').Router()
 const KegiatanController = require('../controllers/KegiatanController')
-const Authentication = require('../middlewares/authentication')
+
 
 /*
 Router.get / .post / .delete / .patch / .put

@@ -25,6 +25,7 @@ const Navbar = () => {
                                     <a className="dropdown-item" href="/sumberdaya/manusia">Sumber Daya Manusia</a>
                                     <a className="dropdown-item" href="/sumberdaya/kegiatan">Kegiatan Proyek</a>
                                     <a className="dropdown-item" href="/sumberdaya/kategori">Kategori Proyek</a>
+                                    <a className="dropdown-item" href="/sumberdaya/biayarole">Biaya Role</a>
                                 </div>
                             </li>
                         }
@@ -32,7 +33,7 @@ const Navbar = () => {
                             (role === "pm" ||
                                 role === "direktur")
                             &&
-                            
+
                             <li className="nav-item dropdown">
                                 <a className="nav-link dropdown-toggle" href="#" id="navbarDropdown2" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     Proyek</a>
@@ -44,6 +45,17 @@ const Navbar = () => {
                                     <a className="dropdown-item" href="/proyek/scheduling">Scheduling</a>
                                 </div>
                             </li>
+
+                        }
+                        {
+                            (role === "pm" ||
+                                role === "direktur")
+                            &&
+
+                            <li className="nav-item">
+                                <a className="nav-link" href="/monitoringproyek">Monitoring proyek</a>
+                            </li>
+
                         }
                         {
                             role === "mandor" &&

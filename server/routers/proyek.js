@@ -3,7 +3,7 @@ const router = require('.')
 
 const proyek = require('express').Router()
 const ProyekController = require('../controllers/ProyekController')
-const Authentication = require('../middlewares/authentication')
+
 
 proyek.post('/tambah', ProyekController.tambah)
 proyek.get('/', ProyekController.read)

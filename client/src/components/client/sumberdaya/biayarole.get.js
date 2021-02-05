@@ -1,8 +1,8 @@
 import axios from 'axios'
 
-export default async (id) => {
+export default async () => {
     try {
-        const URL = `http://localhost:5000/kegiatanproyek/${id}`
+        const URL = 'http://localhost:5000/biayarole/'
         return await axios.get(URL, {
             timeout: 3000,
             headers: {

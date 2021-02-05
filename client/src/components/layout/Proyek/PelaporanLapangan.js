@@ -62,7 +62,7 @@ const PelaporanLapangan = () => {
             namaProyek: group[0].idSchedulingProyek.idRabProyek.idProyek.namaProyek,
             uraian: group[0].uraian,
             persentase: group[0].persentase,
-            total: _.sumBy(group, x => x.persentase).toFixed(2),
+            total: _.sumBy(group, x => x.persentase),
             count: _.countBy(group, 'uraian'),
             idSDB: group[0].idSDB.map(v => Object.values(v).join('_')).join(','),
             idSDM: group[0].idSDM.map(v => Object.values(v).join('_')).join(','),
@@ -80,7 +80,7 @@ const PelaporanLapangan = () => {
         return {
             idProyek: group[0].idSchedulingProyek._id,
             namaProyek: group[0].idSchedulingProyek.idRabProyek.idProyek.namaProyek,
-            total: _.sumBy(group, x => x.persentase).toFixed(0),
+            total: _.sumBy(group, x => x.persentase).toFixed(1),
         }
     });
 
@@ -93,12 +93,11 @@ const PelaporanLapangan = () => {
     function checkPersentase() {
         resultPersentase.map(r1 => {
             proyek.map(p1 => {
-                if (r1.total >= 100 && r1.namaProyek === p1.namaProyek) {
-                    if (p1.statusProyek !== 'Proyek Selesai') {
-                        console.log(p1.namaProyek)
-                        let idProyek = p1._id
-                        putproyekstatus(idProyek, updateProyek)
-                    }
+                if (r1.total >= 100 && r1.namaProyek === p1.namaProyek && p1.statusProyek != 'Proyek Selesai') {
+                    console.log(p1.namaProyek)
+                    let idProyek = p1._id
+                    putproyekstatus(idProyek, updateProyek)
+
                 }
             })
         })
@@ -313,7 +312,7 @@ const PelaporanLapangan = () => {
                 icon: 'success',
                 title: 'Data telah ditambah'
             }).then(res => {
-                window.location.reload(true);
+                // window.location.reload(true);
             })
         } else {
             const Toast = Swal.mixin({
@@ -426,7 +425,7 @@ const PelaporanLapangan = () => {
                                             className="form-control"
                                             id="keteranganTambahana"
                                             name="keteranganTambahan"
-                                            placeholder="Kosongi jika tidak ada keterangan tambahan"
+                                            placeholder="Harap isi keterangan apa saja yang dilakukan"
                                             onChange={event => handleInputChange(index, event)}
                                         />
                                     </div>

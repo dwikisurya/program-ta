@@ -35,6 +35,9 @@ const rabSchema = new Schema({
     pcsSDB: [{
         type: Number
     }],
+    jabatan: [{
+        type: String
+    }],
     status: String,
     grandTotal: Number,
     created_at: Date,

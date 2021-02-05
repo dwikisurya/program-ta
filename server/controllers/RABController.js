@@ -19,6 +19,7 @@ module.exports = class RABController {
         const inputsdb = req.body.idSDB
         const inputworkhour = req.body.workhourSDM
         const inputpcs = req.body.pcsSDB
+        const inputjabatan = req.body.jabatan
 
         rabproyek.create({
             idProyek: idproyek,
@@ -31,7 +32,8 @@ module.exports = class RABController {
             idSDM: inputsdm,
             idSDB: inputsdb,
             workhourSDM: inputworkhour,
-            pcsSDB: inputpcs
+            pcsSDB: inputpcs,
+            jabatan: inputjabatan
         }).then((result) => {
             res.status(201).json({ msg: 'Data Berhasil Ditambah' })
             console.log(result)
@@ -50,14 +52,14 @@ module.exports = class RABController {
                 select: 'namaProyek'
             }).populate({
                 path: 'rab.idKegiatanProyek',
-                select: 'namaKegiatan-_id'
+                select: 'namaKegiatan'
             }).populate({
                 path: 'idSDB',
                 select: 'namaBarang-_id'
             })
             .populate({
                 path: 'idSDM',
-                select: 'namaKaryawan-_id'
+                select: 'namaKaryawan -_id'
             })
             .then((result) => {
                 res.status(200).json(result)

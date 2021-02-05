@@ -12,7 +12,7 @@ export default async (id, namaproyek, statusq, postedby) => {
     const b = `"namaProyek":` + namaproyekq + "}"
 
     const gabung = a + ',' + e + ',' + f + ',' + b
-
+    console.log(gabung)
     try {
         let res = await axios({
             method: 'post',

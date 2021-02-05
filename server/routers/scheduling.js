@@ -3,7 +3,7 @@ const router = require('.')
 
 const schRouter = require('express').Router()
 const SchedullingController = require('../controllers/SchedulingController')
-const Authentication = require('../middlewares/authentication')
+
 
 /*
 Router.get / .post / .delete / .patch / .put

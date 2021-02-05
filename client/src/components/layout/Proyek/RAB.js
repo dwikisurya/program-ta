@@ -1,7 +1,7 @@
 import React, { useState, useEffect, Fragment } from 'react'
 import Navbar from '../Navbar'
 import ModalRAB from './ModalRAB'
-import _ from 'lodash'
+import _, { merge } from 'lodash'
 import MaterialTable from "material-table"
 import Swal from 'sweetalert2'
 
@@ -16,6 +16,7 @@ import hitproyek from '../../client/proyek/proyek.get'
 import hitpekerjaan from '../../client/sumberdaya/kegiatanproyek.get'
 import hitsdb from '../../client/sumberdaya/sdbarang.get'
 import hitsdm from '../../client/sumberdaya/sdmanusia.get'
+import hitbiaya from '../../client/sumberdaya/biayarole.get'
 
 const RAB = () => {
     const namaUser = localStorage.getItem('namaUser') || null
@@ -43,17 +44,18 @@ const RAB = () => {
             namaProyek: group[0].idProyek.namaProyek,
             rab: group[0].rab,
             status: group[0].status,
+            jabatan: group[0].jabatan,
             idSDB: group[0].idSDB.map(v => Object.values(v).join('_')).join(','),
             idSDM: group[0].idSDM.map(v => Object.values(v).join('_')).join(',')
         }
     });
 
-    const huwala = _.flatMap(dataqq, ({ id, idProyek, namaProyek, rab, status, idSDB, idSDM }) =>
-        _.flatMap(rab, ({ uraianPekerjaan, idKegiatanProyek, totalHarga }) => ({ id: id, idProyek: idProyek, namaProyek: namaProyek, uraian: uraianPekerjaan, idKegiatanProyek: idKegiatanProyek, status: status, totalHarga: totalHarga, idSDB: idSDB, idSDM: idSDM }))
+    const huwala = _.flatMap(dataqq, ({ id, idProyek, namaProyek, rab, status, idSDB, idSDM, jabatan }) =>
+        _.flatMap(rab, ({ uraianPekerjaan, idKegiatanProyek, totalHarga }) => ({ id: id, idProyek: idProyek, namaProyek: namaProyek, uraian: uraianPekerjaan, idKegiatanProyek: idKegiatanProyek, status: status, totalHarga: totalHarga, idSDB: idSDB, idSDM: idSDM, jabatan: jabatan }))
     )
-    console.log(huwala)
-    const result = _.flatMap(huwala, ({ id, idProyek, namaProyek, uraian, idKegiatanProyek, status, totalHarga, idSDB, idSDM }) =>
-        _.map(idKegiatanProyek, tag => ({ id, idProyek, namaProyek, uraian, status, totalHarga, idSDB, idSDM, ...tag }))
+
+    const result = _.flatMap(huwala, ({ id, idProyek, namaProyek, uraian, idKegiatanProyek, status, totalHarga, idSDB, idSDM, jabatan }) =>
+        _.map(idKegiatanProyek, tag => ({ id, idProyek, namaProyek, uraian, status, totalHarga, idSDB, idSDM, jabatan, ...tag }))
     );
 
     // Populate Select For Proyek 
@@ -132,6 +134,27 @@ const RAB = () => {
             )
         })
     }
+
+    // State Get Biayar Role
+    const [biayarole, setbiayaroleData] = useState([])
+    const getBiaya = async () => {
+        const biaya = await hitbiaya()
+        if (biaya.status === 200) {
+            setbiayaroleData(biaya.data)
+        } else {
+            console.log(biaya)
+        }
+    }
+
+    // Dropdown Jabatan
+    const renderJabatan = () => {
+        return biayarole.map(bq => {
+            return (
+                <option key={bq._id} value={bq.namaRole} name='jabatan'>{bq.namaRole}</option>
+            )
+        })
+    }
+
     // Form 
     const [formdata, setFormData] = useState([
         { uraianPekerjaan: '', idKegiatanProyek: {}, hargaKegiatan: {}, volume: '', totalHarga: '', grandTotal: '' }
@@ -142,21 +165,33 @@ const RAB = () => {
     const [updateRAB, setStatusRAB] = useState({ status: 'RAB Accepted' })
     const [formproyek, setFormProyek] = useState([])
     const [barangdansdm, setbarangsdm] = useState([
-        { idSDM: {}, idSDB: {}, workhourSDM: {}, pcsSDB: {} }
+        { idSDM: '', workhourSDM: '', jabatan: '' }
     ])
 
     const handleSDMdanSDB = (index, event) => {
         const values = [...barangdansdm]
         if (event.target.name === "idSDM") {
             values[index].idSDM = Array.from(event.target.selectedOptions, option => option.value)
-        } if (event.target.name === "idSDB") {
-            values[index].idSDB = Array.from(event.target.selectedOptions, option => option.value)
         } if (event.target.name === "workhourSDM") {
             values[index].workhourSDM = Array.from(event.target.value.split(',')) || 0
+        } if (event.target.name === "jabatan") {
+            values[index].jabatan = event.target.value || null
+        }
+        setbarangsdm(values)
+    }
+
+    const [barangdanpcs, setbarangdanpcs] = useState([
+        { idSDB: {}, pcsSDB: {} }
+    ])
+
+    const handleBarangdanPcs = (index, event) => {
+        const values = [...barangdanpcs]
+        if (event.target.name === "idSDB") {
+            values[index].idSDB = Array.from(event.target.selectedOptions, option => option.value)
         } if (event.target.name === "pcsSDB") {
             values[index].pcsSDB = Array.from(event.target.value.split(',')) || 0
         }
-        setbarangsdm(values)
+        setbarangdanpcs(values)
     }
 
     const handlerChange = (e) => {
@@ -169,24 +204,45 @@ const RAB = () => {
         let j = 0
         if (event.target.name === "idProyek") {
             values.idProyek = event.target.value
-        }
-        if (event.target.name === "uraianPekerjaan") {
-            values[index].uraianPekerjaan = event.target.value;
+        } if (event.target.name === "uraianPekerjaan") {
+            values[index].uraianPekerjaan = event.target.value
+        } if (event.target.name === "uraianPekerjaan2") {
+            values[index].uraianPekerjaan = event.target.value
+            // Set TotalHarga
+            const indexx = event.target.selectedIndex;
+            const optionElement = event.target.childNodes[indexx]
+            const option = optionElement.getAttribute('data-totalharga')
+            values[index].totalHarga = parseInt(option)
+
+            // Set Id Pekerjaan
+            const optionid = optionElement.getAttribute('data-kegiatan')
+            const idPekerjaan = optionid.split(',')
+            values[index].idKegiatanProyek = idPekerjaan
+
+            // Set Harga Kegiatan
+            const optionHk = optionElement.getAttribute('data-hargakegiatan')
+            const hargaKegiatan = optionHk.split(',')
+            values[index].hargaKegiatan = hargaKegiatan
+
+            // Set Volume
+            const optionVolume = optionElement.getAttribute('data-volume')
+            const volume = optionVolume.split(',')
+            values[index].volume = volume
+
         } if (event.target.name === "idPekerjaan") {
-            values[index].idKegiatanProyek = Array.from(event.target.selectedOptions, option => option.value)
+            values[index].idKegiatanProyek = Array.from(event.target.selectedOptions, option => option.value) || null
             values[index].hargaKegiatan = Array.from(event.target.selectedOptions, option => parseInt(option.attributes.getNamedItem("data-valuea").value)) || 0
         } if (event.target.name === "volume") {
             values[index].volume = Array.from(event.target.value.split(',')) || 0
+            i = values[index].hargaKegiatan
+            j = values[index].volume
+            var sum = i.map(function (num, idx) {
+                return num * j[idx];
+            });
+            const sumAll = sum.reduce((result, number) => result + number);
+            values[index].totalHarga = sumAll
         }
-        i = values[index].hargaKegiatan
-        j = values[index].volume
 
-        var sum = i.map(function (num, idx) {
-            return num * j[idx];
-        });
-
-        const sumAll = sum.reduce((result, number) => result + number);
-        values[index].totalHarga = sumAll
         setFormData(values)
     };
 
@@ -224,18 +280,38 @@ const RAB = () => {
             return c = d1.count[b]
         })
 
-        const inputsdm = barangdansdm[0].idSDM
-        const inputsdb = barangdansdm[0].idSDB
-        const inputworkhour = barangdansdm[0].workhourSDM
-        const inputpcssdb = barangdansdm[0].pcsSDB
+        //convert sdn
+        var result = {};
+        for (var i = 0; i < barangdansdm.length; i++) {
+            var item = barangdansdm[i];
+            for (var key in item) {
+                if (!(key in result))
+                    result[key] = [];
+                result[key].push(item[key]);
+            }
+        }
+        var resultBarang = {};
+        for (var i = 0; i < barangdanpcs.length; i++) {
+            var item = barangdanpcs[i];
+            for (var key in item) {
+                if (!(key in resultBarang))
+                    resultBarang[key] = [];
+                resultBarang[key].push(item[key]);
+            }
+        }
+
+        const inputworkhour = result.workhourSDM.map(v => Object.values(v).join('_')).join(",").replace(/'/g, '"')
+        const inputsdm = result.idSDM.map(v => Object.values(v).join('_')).join("','").replace(/'/g, '"')
+        const inputsdb = resultBarang.idSDB[0]
+        const inputpcssdb = resultBarang.pcsSDB
+        const inputjabatan = result.jabatan
 
         if (formdata !== null && formproyek !== null && c < 1 || c === undefined) {
             let total = 0
             for (let i = 0; i < formdata.length; i++) {
                 total += formdata[i].totalHarga
             }
-            postrab(formdata, idform, total, namaUser, inputsdm, inputsdb, inputworkhour, inputpcssdb)
-            console.log(idform)
+            postrab(formdata, idform, total, namaUser, inputsdm, inputsdb, inputworkhour, inputpcssdb, inputjabatan)
             const Toast = Swal.mixin({
                 toast: true,
                 position: 'top-end',
@@ -273,6 +349,20 @@ const RAB = () => {
         }
     };
 
+    // Utk yang diatas
+    const handleAddFieldsAtas = () => {
+        const values = [...barangdansdm];
+        values.push({ idSDM: '', workhourSDM: '', jabatan: '' });
+        setbarangsdm(values);
+    };
+
+    const handleRemoveFieldsAtas = index => {
+        const values = [...barangdansdm];
+        values.splice(index, 1);
+        setbarangsdm(values);
+    };
+
+    // Utk Yang dibawah(Pekerjaan Proyek)
     const handleAddFields = () => {
         const values = [...formdata];
         values.push({ uraianPekerjaan: '', idKegiatanProyek: {}, hargaKegiatan: {}, volume: '', totalHarga: '' });
@@ -283,8 +373,8 @@ const RAB = () => {
         const values = [...formdata];
         values.splice(index, 1);
         setFormData(values);
-    };
-    console.log(result)
+    }
+
     // Update Status Proyek
     const updateStatus = (e, id, idproyek) => {
         if (role === 'direktur') {
@@ -380,6 +470,43 @@ const RAB = () => {
             })
     }
 
+    const rendertableinfoRAB = () => {
+        return rab.map(rq => {
+            return rq.rab.map(rqrab => {
+                return (
+                    <tr>
+                        <td>{rq.idProyek.namaProyek}</td>
+                        <td>{rqrab.uraianPekerjaan}</td>
+                        <td> {rqrab.idKegiatanProyek.map(nm => {
+                            return <tr><td style={{ height: 50 }}>{nm.namaKegiatan}<br></br></td></tr>
+                        })}
+                        </td>
+                        <td> {rqrab.volume.map(nb => {
+                            return <tr><td style={{ height: 50 }}>{nb}<br></br></td></tr>
+                        })}
+                        </td>
+                    </tr>
+                )
+            })
+        })
+    }
+
+    const renderFormUraianPekerjaan = () => {
+        return rab.map(rq => {
+            return rq.rab.map(rqrab => {
+                return (
+                    <option key={rqrab._id} value={rqrab.uraianPekerjaan} name={rqrab.uraianPekerjaan} data-kegiatan={rqrab.idKegiatanProyek.map(id => {
+                        return id._id
+                    })} data-totalharga={rqrab.totalHarga}
+                        data-volume={rqrab.volume.map(v => {
+                            return v
+                        })} data-hargakegiatan={rqrab.hargaKegiatan.map(hk => {
+                            return hk
+                        })}>{rq.idProyek.namaProyek + ` - ` + rqrab.uraianPekerjaan}</option>
+                )
+            })
+        })
+    }
 
     useEffect(() => {
         getData()
@@ -387,6 +514,7 @@ const RAB = () => {
         getPekerjaan()
         getSDM()
         getSDB()
+        getBiaya()
     }, [])
 
     return (
@@ -404,59 +532,70 @@ const RAB = () => {
                                     <option value="">     </option>
                                     {renderProyek()}
                                 </select>
+
                                 {barangdansdm.map((bsq, index) => (
                                     <Fragment key={`${bsq}~${index}`}>
-                                        <div className="form-group col-sm-6">
-                                            <label htmlFor="volume">Tim Untuk Bekerja</label>
-                                            <select multiple class="form-control" id="idSDM" name="idSDM" onChange={event => handleSDMdanSDB(index, event)}>
+                                        <div className="form-group col-sm-4">
+                                            <label htmlFor="volume">Tim Untuk Bekerja {index}</label>
+                                            <select className="form-control" id="idSDM" name="idSDM" onChange={event => handleSDMdanSDB(index, event)}>
+                                                <option value="">     </option>
                                                 {renderSDM()}
                                             </select>
+                                        </div>
+
+                                        <div className="form-group col-sm-2">
+                                            <div>
+                                                <label htmlFor="volume">Jabatan</label>
+                                                <select className="form-control" id="jabatan" name="jabatan" onChange={event => handleSDMdanSDB(index, event)} >
+                                                    <option value="">     </option>
+                                                    {renderJabatan()}
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div className="form-group col-sm-4">
+                                            <div>
+                                                <label htmlFor="volume">Durasi Kerja /hari {index}</label>
+                                                <input
+                                                    type="number"
+                                                    className="form-control"
+                                                    id="workhourSDM"
+                                                    name="workhourSDM"
+                                                    onChange={event => handleSDMdanSDB(index, event)}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="form-group col-sm-2">
+                                            <button
+                                                className="btn btn-link"
+                                                type="button"
+                                                onClick={() => handleRemoveFieldsAtas(index)}>-</button>
+                                            <button
+                                                className="btn btn-link"
+                                                type="button"
+                                                onClick={() => handleAddFieldsAtas()}> + </button>
+                                        </div>
+                                    </Fragment>
+                                ))}
+
+                                {barangdanpcs.map((bsq, index) => (
+                                    <Fragment key={`${bsq}~${index}`}>
+                                        <div className="form-group col-sm-6">
                                             <label htmlFor="volume">Barang Dibutuhkan</label>
-                                            <select multiple class="form-control" id="idSDB" name="idSDB" onChange={event => handleSDMdanSDB(index, event)}>
+                                            <select multiple class="form-control" id="idSDB" name="idSDB" onChange={event => handleBarangdanPcs(index, event)}>
                                                 {renderSDB()}
                                             </select>
                                         </div>
 
                                         <div className="form-group col-sm-6">
-                                            <div>
-                                                <label htmlFor="volume">Durasi Bekerja /Hari</label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    id="workhourSDM"
-                                                    name="workhourSDM"
-                                                    onChange={event => handleSDMdanSDB(index, event)}
-                                                    required
-                                                />
-                                            </div>
-                                            <div>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    disabled
-                                                    style={{ visibility: 'hidden' }}
-                                                />
-                                            </div>
-                                            <div>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    disabled
-                                                    style={{ visibility: 'hidden' }}
-                                                />
-                                            </div>
-                                            <div>
-                                                <label htmlFor="volume">Jumlah /pcs</label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    id="pcsSDB"
-                                                    name="pcsSDB"
-                                                    onChange={event => handleSDMdanSDB(index, event)}
-                                                    required
-                                                />
-                                            </div>
-                                            <div></div>
+                                            <label htmlFor="volume">Jumlah /pcs</label>
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                id="pcsSDB"
+                                                name="pcsSDB"
+                                                onChange={event => handleBarangdanPcs(index, event)}
+                                            />
                                         </div>
                                     </Fragment>
                                 ))}
@@ -464,27 +603,7 @@ const RAB = () => {
                                 {formdata.map((formdataq, index) => (
                                     <Fragment key={`${formdataq}~${index}`}>
                                         <div className="form-group col-sm-4">
-                                            <label htmlFor="volume">Id Pekerjaan</label>
-                                            <select multiple class="form-control" id="idPekerjaan" name="idPekerjaan" onChange={event => handleInputChange(index, event)} required>
-                                                {renderPekerjaan()}
-                                            </select>
-                                        </div>
-
-                                        <div className="form-group col-sm-2">
-                                            <label htmlFor="volume">Volume</label>
-                                            <input
-                                                type="text"
-                                                className="form-control"
-                                                id="volume"
-                                                name="volume"
-                                                value={formdataq.volume}
-                                                onChange={event => handleInputChange(index, event)}
-                                                required
-                                            />
-                                        </div>
-
-                                        <div className="form-group col-sm-4">
-                                            <label htmlFor="uraianPekerjaan">Uraian Pekerjaan</label>
+                                            <label htmlFor="uraianPekerjaan">Uraian Pekerjaan {index}</label>
                                             <input
                                                 type="text"
                                                 className="form-control"
@@ -492,7 +611,30 @@ const RAB = () => {
                                                 name="uraianPekerjaan"
                                                 value={formdataq.uraianPekerjaan}
                                                 onChange={event => handleInputChange(index, event)}
-                                                required
+                                            />
+                                            <label htmlFor="uraianPekerjaan">Uraian Pekerjaan dari Proyek lain{index}</label>
+                                            <select className="form-control" id="uraianPekerjaan2" name="uraianPekerjaan2" onChange={event => handleInputChange(index, event)} >
+                                                <option value="">     </option>
+                                                {renderFormUraianPekerjaan()}
+                                            </select>
+                                        </div>
+
+                                        <div className="form-group col-sm-4">
+                                            <label htmlFor="volume">Id Pekerjaan {index}</label>
+                                            <select multiple class="form-control" id="idPekerjaan" name="idPekerjaan" onChange={event => handleInputChange(index, event)}>
+                                                {renderPekerjaan()}
+                                            </select>
+                                        </div>
+
+                                        <div className="form-group col-sm-2">
+                                            <label htmlFor="volume">Volume {index}</label>
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                id="volume"
+                                                name="volume"
+                                                value={formdataq.volume}
+                                                onChange={event => handleInputChange(index, event)}
                                             />
                                         </div>
 
@@ -515,6 +657,8 @@ const RAB = () => {
                                     type="submit"> Save</button>
                             </div>
                         </form>
+                        <br />
+                        <button type="button" className="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter">Info</button>
                     </div>
 
                     <div className="col-md-7">
@@ -530,7 +674,12 @@ const RAB = () => {
                                 },
                                 { title: "Total", field: "totalHarga" },
                                 { title: "Status", field: "status" },
-                                { title: "Tim SDM Ditunjuk", field: "idSDM" },
+                                {
+                                    render: (rowData) => {
+                                        return `${rowData.idSDM} ( ${rowData.jabatan})`;
+                                    },
+                                    title: 'Tim SDM',
+                                },
                                 { title: "SDB Dibutuhkan", field: "idSDB" },
                                 {
                                     title: "Edit",
@@ -572,6 +721,35 @@ const RAB = () => {
                     </div>
                 </div>
             </div >
+            <div className="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                <div className="modal-dialog modal-dialog-centered modal-xl" role="document">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h5 className="modal-title" id="exampleModalLongTitle">Info</h5>
+                            <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div className="modal-body">
+                            <p>Berikut adalah daftar pekerjaan dari masing-masing uraian pekerjaan yang biasanya dilakukan.</p>
+                            <table className="table table-bordered" id="info">
+                                <thead>
+                                    <tr>
+                                        <th>Nama Proyek</th>
+                                        <th>Nama Uraian Pekerjaan</th>
+                                        <th>Pekerjaan apa saja yang dilakukan</th>
+                                        <th>Volume Pekerjaan</th>
+                                    </tr>
+                                </thead>
+                                <tbody>{rendertableinfoRAB()}</tbody>
+                            </table>
+                        </div>
+                        <div className="modal-footer">
+                            <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div >
 
     );

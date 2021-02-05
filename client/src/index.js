@@ -18,12 +18,15 @@ import SDB from './components/layout/SumberDaya/SDB'
 import SDM from './components/layout/SumberDaya/SDM'
 import Kegiatan from './components/layout/SumberDaya/KegiatanProyek'
 import Kategori from './components/layout/SumberDaya/KategoriProyek'
+import RoleBiaya from './components/layout/SumberDaya/BiayaRole'
 
 import RAB from './components/layout/Proyek/RAB'
 import Proyek from './components/layout/Proyek/Proyek'
 import Scheduling from './components/layout/Proyek/Scheduling'
 
 import PelaporanLapangan from './components/layout/Proyek/PelaporanLapangan'
+
+import MonitoringProyek from './components/layout/Proyek/MonitoringProyek'
 
 import LaporanSumberDaya from './components/layout/Laporan/LaporanSumberdaya'
 import LaporanProyek from './components/layout/Laporan/LaporanProyek'
@@ -45,6 +48,7 @@ function mappingRouting() {
         <Route exact path="/sumberdaya/manusia"><SDM /></Route>
         <Route exact path="/sumberdaya/kegiatan"><Kegiatan /></Route>
         <Route exact path="/sumberdaya/kategori"><Kategori /></Route>
+        <Route exact path="/sumberdaya/biayarole"><RoleBiaya /></Route>
         <Route exact path="/laporan/sumberdaya"><LaporanSumberDaya /></Route>
         <Route path=""><Pagenotfound /></Route>
       </Switch>
@@ -55,6 +59,7 @@ function mappingRouting() {
         <Route exact path="/laporan/proyek"><LaporanProyek /></Route>
         <Route exact path="/proyek/rab"><RAB /></Route>
         <Route exact path="/proyek/scheduling"><Scheduling /></Route>
+        <Route exact path="/monitoringproyek"><MonitoringProyek /></Route>
         <Route path=""><Pagenotfound /></Route>
       </Switch>
 
@@ -71,6 +76,7 @@ function mappingRouting() {
         <Route exact path="/proyek"><Proyek /></Route>
         <Route exact path="/proyek/rab"><RAB /></Route>
         <Route exact path="/proyek/scheduling"><Scheduling /></Route>
+        <Route exact path="/monitoringproyek"><MonitoringProyek /></Route>
         <Route exact path="/laporan/sumberdaya"><LaporanSumberDaya /></Route>
         <Route exact path="/laporan/proyek"><LaporanProyek /></Route>
         <Route path=""><Pagenotfound /></Route>
